@@ -2,11 +2,12 @@ import { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, ImageIcon } from "lucide-react";
+import { toast } from "sonner";
 import ScanLine from "@/components/Scanner/ScanLine";
 import ScanBrackets from "@/components/Scanner/ScanBrackets";
 import CaptureButton from "@/components/Scanner/CaptureButton";
 import ResultSheet, { type ScanResult } from "@/components/Results/ResultSheet";
-import { getRandomResult } from "@/data/mockResults";
+import { scanWasteImage } from "@/lib/scanApi";
 
 const Scanner = () => {
   const webcamRef = useRef<Webcam>(null);
@@ -16,7 +17,7 @@ const Scanner = () => {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState(false);
 
-  const handleCapture = useCallback(() => {
+  const handleCapture = useCallback(async () => {
     if (isProcessing) return;
     const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
@@ -24,24 +25,34 @@ const Scanner = () => {
     }
     setIsProcessing(true);
 
-    // Simulate AI processing
-    setTimeout(() => {
-      setResult(getRandomResult());
+    try {
+      const scanResult = await scanWasteImage(imageSrc || "");
+      setResult(scanResult);
+    } catch (e) {
+      console.error("Scan failed:", e);
+      toast.error(e instanceof Error ? e.message : "Failed to analyze image. Try again.");
+    } finally {
       setIsProcessing(false);
-    }, 2000);
+    }
   }, [isProcessing]);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
-      setCapturedImage(reader.result as string);
+    reader.onload = async () => {
+      const imageData = reader.result as string;
+      setCapturedImage(imageData);
       setIsProcessing(true);
-      setTimeout(() => {
-        setResult(getRandomResult());
+      try {
+        const scanResult = await scanWasteImage(imageData);
+        setResult(scanResult);
+      } catch (err) {
+        console.error("Scan failed:", err);
+        toast.error(err instanceof Error ? err.message : "Failed to analyze image.");
+      } finally {
         setIsProcessing(false);
-      }, 2000);
+      }
     };
     reader.readAsDataURL(file);
   };
