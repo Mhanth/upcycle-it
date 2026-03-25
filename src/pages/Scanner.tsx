@@ -2,11 +2,12 @@ import { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, ImageIcon } from "lucide-react";
+import { toast } from "sonner";
 import ScanLine from "@/components/Scanner/ScanLine";
 import ScanBrackets from "@/components/Scanner/ScanBrackets";
 import CaptureButton from "@/components/Scanner/CaptureButton";
 import ResultSheet, { type ScanResult } from "@/components/Results/ResultSheet";
-import { getRandomResult } from "@/data/mockResults";
+import { scanWasteImage } from "@/lib/scanApi";
 
 const Scanner = () => {
   const webcamRef = useRef<Webcam>(null);
