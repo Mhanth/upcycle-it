@@ -71,7 +71,7 @@ const MyLog = () => {
               {day.items.map((item, ii) => (
                 <motion.div
                   key={ii}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border"
+                  className="flex items-center gap-3 p-3 rounded-2xl glass-card"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: (di * 3 + ii) * 0.08 }}

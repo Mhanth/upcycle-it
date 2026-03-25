@@ -39,7 +39,7 @@ const Community = () => {
           {mockPosts.map((post, i) => (
             <motion.div
               key={post.id}
-              className="rounded-xl bg-card border border-border overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all cursor-pointer"
+              className="rounded-2xl glass-card overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all cursor-pointer"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
