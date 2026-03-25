@@ -23,7 +23,7 @@ const Community = () => {
 
         {/* Weekly Challenge */}
         <motion.div
-          className="p-5 rounded-xl bg-gradient-to-br from-category-upcycle/20 to-card border border-category-upcycle/30 mb-6"
+          className="p-5 rounded-2xl bg-gradient-to-br from-category-upcycle/20 to-card border border-category-upcycle/30 mb-6"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
