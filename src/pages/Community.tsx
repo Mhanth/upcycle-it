@@ -16,7 +16,7 @@ const Community = () => {
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-display font-bold text-foreground">Community</h1>
-          <button className="p-2 rounded-lg bg-card border border-border text-muted-foreground">
+          <button className="p-2 rounded-xl glass-card text-muted-foreground">
             <Filter size={16} />
           </button>
         </div>
