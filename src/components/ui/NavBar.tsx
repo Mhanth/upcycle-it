@@ -7,15 +7,15 @@ const navItems = [
   { path: "/scan", icon: Camera, label: "Scan" },
   { path: "/community", icon: Users, label: "Community" },
   { path: "/facilities", icon: Map, label: "Map" },
-  { path: "/log", icon: BarChart3, label: "My Log" },
+  { path: "/log", icon: BarChart3, label: "Log" },
 ];
 
 const NavBar = () => {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border">
-      <div className="flex items-center justify-around px-2 py-2 max-w-lg mx-auto">
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+      <div className="flex items-center gap-1 px-3 py-2.5 rounded-2xl glass-card">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
@@ -23,21 +23,23 @@ const NavBar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className="relative flex flex-col items-center gap-0.5 px-3 py-1.5"
+              className={`relative flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-colors ${
+                isActive ? "bg-primary/15" : "hover:bg-primary/5"
+              }`}
             >
               {isActive && (
                 <motion.div
-                  layoutId="nav-indicator"
-                  className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-primary"
+                  layoutId="nav-glow"
+                  className="absolute inset-0 rounded-xl bg-primary/10"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
               <Icon
-                size={20}
-                className={isActive ? "text-primary" : "text-muted-foreground"}
+                size={18}
+                className={`relative z-10 ${isActive ? "text-primary" : "text-muted-foreground"}`}
               />
               <span
-                className={`text-[10px] font-data ${
+                className={`relative z-10 text-[9px] font-data ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
