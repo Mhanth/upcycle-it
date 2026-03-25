@@ -17,7 +17,7 @@ const Scanner = () => {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState(false);
 
-  const handleCapture = useCallback(() => {
+  const handleCapture = useCallback(async () => {
     if (isProcessing) return;
     const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
@@ -25,11 +25,15 @@ const Scanner = () => {
     }
     setIsProcessing(true);
 
-    // Simulate AI processing
-    setTimeout(() => {
-      setResult(getRandomResult());
+    try {
+      const scanResult = await scanWasteImage(imageSrc || "");
+      setResult(scanResult);
+    } catch (e) {
+      console.error("Scan failed:", e);
+      toast.error(e instanceof Error ? e.message : "Failed to analyze image. Try again.");
+    } finally {
       setIsProcessing(false);
-    }, 2000);
+    }
   }, [isProcessing]);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
