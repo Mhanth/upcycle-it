@@ -1,14 +1,65 @@
 import { motion } from "framer-motion";
 
 const wasteItems = [
-  { emoji: "🍾", x: "10%", y: "15%", delay: 0, size: 40 },
-  { emoji: "🥫", x: "75%", y: "20%", delay: 1.2, size: 32 },
-  { emoji: "📦", x: "85%", y: "55%", delay: 0.8, size: 36 },
-  { emoji: "🔋", x: "20%", y: "60%", delay: 2.1, size: 28 },
-  { emoji: "👟", x: "60%", y: "70%", delay: 0.4, size: 34 },
-  { emoji: "📱", x: "40%", y: "25%", delay: 1.6, size: 30 },
-  { emoji: "🥤", x: "90%", y: "35%", delay: 0.6, size: 32 },
-  { emoji: "🛍️", x: "5%", y: "40%", delay: 1.8, size: 36 },
+  {
+    x: "8%", y: "12%", delay: 0, size: 56,
+    svg: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 4h8l2 6H18l2-6z" fill="hsl(162 72% 45% / 0.3)" stroke="hsl(162 72% 45% / 0.5)" strokeWidth="1.5"/>
+        <rect x="16" y="10" width="16" height="30" rx="4" fill="hsl(162 72% 45% / 0.15)" stroke="hsl(162 72% 45% / 0.4)" strokeWidth="1.5"/>
+        <path d="M22 40h4v4h-4z" fill="hsl(162 72% 45% / 0.3)"/>
+      </svg>
+    ),
+  },
+  {
+    x: "78%", y: "18%", delay: 1.2, size: 44,
+    svg: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="14" fill="hsl(162 72% 45% / 0.1)" stroke="hsl(162 72% 45% / 0.4)" strokeWidth="1.5"/>
+        <path d="M24 10v28M10 24h28" stroke="hsl(162 72% 45% / 0.3)" strokeWidth="1"/>
+        <path d="M18 18l12 12M30 18L18 30" stroke="hsl(162 72% 45% / 0.25)" strokeWidth="1"/>
+      </svg>
+    ),
+  },
+  {
+    x: "88%", y: "50%", delay: 0.8, size: 48,
+    svg: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="8" width="28" height="32" rx="3" fill="hsl(162 72% 45% / 0.1)" stroke="hsl(162 72% 45% / 0.35)" strokeWidth="1.5"/>
+        <path d="M10 16h28" stroke="hsl(162 72% 45% / 0.25)" strokeWidth="1"/>
+        <rect x="18" y="20" width="12" height="8" rx="1" fill="hsl(162 72% 45% / 0.15)"/>
+      </svg>
+    ),
+  },
+  {
+    x: "15%", y: "55%", delay: 2.1, size: 38,
+    svg: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="18" y="6" width="12" height="36" rx="6" fill="hsl(162 72% 45% / 0.12)" stroke="hsl(162 72% 45% / 0.4)" strokeWidth="1.5"/>
+        <circle cx="24" cy="12" r="2" fill="hsl(162 72% 45% / 0.4)"/>
+        <path d="M20 38h8" stroke="hsl(162 72% 45% / 0.3)" strokeWidth="1.5"/>
+      </svg>
+    ),
+  },
+  {
+    x: "55%", y: "65%", delay: 0.4, size: 50,
+    svg: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 8h16l4 32H12l4-32z" fill="hsl(162 72% 45% / 0.1)" stroke="hsl(162 72% 45% / 0.35)" strokeWidth="1.5"/>
+        <path d="M14 16h20" stroke="hsl(162 72% 45% / 0.2)" strokeWidth="1"/>
+        <circle cx="24" cy="28" r="4" fill="hsl(162 72% 45% / 0.15)" stroke="hsl(162 72% 45% / 0.3)" strokeWidth="1"/>
+      </svg>
+    ),
+  },
+  {
+    x: "35%", y: "20%", delay: 1.6, size: 42,
+    svg: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 6l16 28H8L24 6z" fill="hsl(162 72% 45% / 0.08)" stroke="hsl(162 72% 45% / 0.35)" strokeWidth="1.5"/>
+        <path d="M24 20v8M24 32v2" stroke="hsl(162 72% 45% / 0.4)" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
 ];
 
 const FloatingWaste = () => {
@@ -17,20 +68,20 @@ const FloatingWaste = () => {
       {wasteItems.map((item, i) => (
         <motion.div
           key={i}
-          className="absolute opacity-20"
-          style={{ left: item.x, top: item.y, fontSize: item.size }}
+          className="absolute"
+          style={{ left: item.x, top: item.y, width: item.size, height: item.size }}
           animate={{
-            y: [0, -15, -8, 0],
-            rotate: [0, 2, -1, 0],
+            y: [0, -12, -6, 0],
+            rotate: [0, 3, -2, 0],
           }}
           transition={{
-            duration: 6,
+            duration: 7,
             delay: item.delay,
             repeat: Infinity,
             ease: "easeInOut",
           }}
         >
-          {item.emoji}
+          {item.svg}
         </motion.div>
       ))}
     </div>

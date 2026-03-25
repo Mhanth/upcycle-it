@@ -16,14 +16,14 @@ const Community = () => {
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-display font-bold text-foreground">Community</h1>
-          <button className="p-2 rounded-lg bg-card border border-border text-muted-foreground">
+          <button className="p-2 rounded-xl glass-card text-muted-foreground">
             <Filter size={16} />
           </button>
         </div>
 
         {/* Weekly Challenge */}
         <motion.div
-          className="p-5 rounded-xl bg-gradient-to-br from-category-upcycle/20 to-card border border-category-upcycle/30 mb-6"
+          className="p-5 rounded-2xl bg-gradient-to-br from-category-upcycle/20 to-card border border-category-upcycle/30 mb-6"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -39,7 +39,7 @@ const Community = () => {
           {mockPosts.map((post, i) => (
             <motion.div
               key={post.id}
-              className="rounded-xl bg-card border border-border overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all cursor-pointer"
+              className="rounded-2xl glass-card overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all cursor-pointer"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}

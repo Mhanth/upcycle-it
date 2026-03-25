@@ -39,7 +39,7 @@ const MyLog = () => {
             { icon: Flame, value: "7 days", label: "Scan Streak", color: "text-destructive" },
             { icon: Trophy, value: "Eco Warrior", label: "Current Level", color: "text-category-upcycle" },
           ].map((stat, i) => (
-            <div key={i} className="p-4 rounded-xl bg-card border border-border">
+            <div key={i} className="p-4 rounded-2xl glass-card">
               <stat.icon size={16} className={stat.color} />
               <div className="text-xl font-display font-bold text-foreground mt-2 tabular-nums">{stat.value}</div>
               <div className="text-[10px] font-data text-muted-foreground uppercase">{stat.label}</div>
@@ -48,7 +48,7 @@ const MyLog = () => {
         </motion.div>
 
         {/* XP Bar */}
-        <div className="p-4 rounded-xl bg-card border border-border mb-6">
+        <div className="p-4 rounded-2xl glass-card mb-6">
           <div className="flex justify-between text-xs font-data text-muted-foreground mb-2">
             <span>Level 4: Eco Warrior</span>
             <span>680 / 1000 XP</span>
@@ -71,7 +71,7 @@ const MyLog = () => {
               {day.items.map((item, ii) => (
                 <motion.div
                   key={ii}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border"
+                  className="flex items-center gap-3 p-3 rounded-2xl glass-card"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: (di * 3 + ii) * 0.08 }}
