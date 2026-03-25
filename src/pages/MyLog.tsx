@@ -39,7 +39,7 @@ const MyLog = () => {
             { icon: Flame, value: "7 days", label: "Scan Streak", color: "text-destructive" },
             { icon: Trophy, value: "Eco Warrior", label: "Current Level", color: "text-category-upcycle" },
           ].map((stat, i) => (
-            <div key={i} className="p-4 rounded-xl bg-card border border-border">
+            <div key={i} className="p-4 rounded-2xl glass-card">
               <stat.icon size={16} className={stat.color} />
               <div className="text-xl font-display font-bold text-foreground mt-2 tabular-nums">{stat.value}</div>
               <div className="text-[10px] font-data text-muted-foreground uppercase">{stat.label}</div>
