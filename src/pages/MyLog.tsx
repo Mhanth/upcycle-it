@@ -48,7 +48,7 @@ const MyLog = () => {
         </motion.div>
 
         {/* XP Bar */}
-        <div className="p-4 rounded-xl bg-card border border-border mb-6">
+        <div className="p-4 rounded-2xl glass-card mb-6">
           <div className="flex justify-between text-xs font-data text-muted-foreground mb-2">
             <span>Level 4: Eco Warrior</span>
             <span>680 / 1000 XP</span>
