@@ -36,17 +36,23 @@ const Scanner = () => {
     }
   }, [isProcessing]);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
-      setCapturedImage(reader.result as string);
+    reader.onload = async () => {
+      const imageData = reader.result as string;
+      setCapturedImage(imageData);
       setIsProcessing(true);
-      setTimeout(() => {
-        setResult(getRandomResult());
+      try {
+        const scanResult = await scanWasteImage(imageData);
+        setResult(scanResult);
+      } catch (err) {
+        console.error("Scan failed:", err);
+        toast.error(err instanceof Error ? err.message : "Failed to analyze image.");
+      } finally {
         setIsProcessing(false);
-      }, 2000);
+      }
     };
     reader.readAsDataURL(file);
   };
