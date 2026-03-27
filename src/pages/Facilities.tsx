@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { MapPin, Clock, Phone, Navigation, Search } from "lucide-react";
 
-const mockFacilities = [
-  { name: "GreenCycle Recycling Center", type: "Recycling", distance: "0.8 km", hours: "8AM - 6PM", materials: "Plastics, Glass, Metal, Paper", color: "bg-category-recycle", phone: "(555) 123-4567" },
-  { name: "City Compost Drop-off", type: "Composting", distance: "1.2 km", hours: "7AM - 5PM", materials: "Food waste, Yard trimmings", color: "bg-category-compost", phone: "(555) 234-5678" },
-  { name: "HazWaste Solutions", type: "Hazardous", distance: "2.4 km", hours: "9AM - 4PM", materials: "Batteries, Paint, Electronics, Chemicals", color: "bg-category-hazard", phone: "(555) 345-6789" },
-  { name: "ReUse Hub Thrift", type: "Reuse", distance: "1.7 km", hours: "10AM - 7PM", materials: "Clothing, Furniture, Books, Toys", color: "bg-category-upcycle", phone: "(555) 456-7890" },
-  { name: "Metro Recycling Depot", type: "Recycling", distance: "3.1 km", hours: "6AM - 8PM", materials: "All recyclables, E-waste", color: "bg-category-recycle", phone: "(555) 567-8901" },
+const lucknowFacilities = [
+  { name: "Lucknow Nagar Nigam Recycling Center", type: "Recycling", distance: "1.2 km", hours: "8AM - 5PM", materials: "Plastics, Glass, Metal, Paper", color: "bg-category-recycle", phone: "+91 522-2617893", lat: 26.8467, lng: 80.9462 },
+  { name: "Gomti Nagar Waste Collection Point", type: "Recycling", distance: "2.1 km", hours: "7AM - 6PM", materials: "Household recyclables, E-waste", color: "bg-category-recycle", phone: "+91 522-2302090", lat: 26.8568, lng: 81.0048 },
+  { name: "Chinhat Compost Facility", type: "Composting", distance: "5.8 km", hours: "6AM - 4PM", materials: "Food waste, Garden trimmings, Agri-waste", color: "bg-category-compost", phone: "+91 522-2690011", lat: 26.8800, lng: 81.0400 },
+  { name: "LSML Hazardous Waste Depot", type: "Hazardous", distance: "4.3 km", hours: "9AM - 3PM", materials: "Batteries, Paints, Chemicals, Medical waste", color: "bg-category-hazard", phone: "+91 522-2614500", lat: 26.8300, lng: 80.9100 },
+  { name: "Aliganj Kabadiwala Hub", type: "Reuse", distance: "3.0 km", hours: "9AM - 7PM", materials: "Scrap metal, Paper, Electronics, Clothing", color: "bg-category-upcycle", phone: "+91 522-2325678", lat: 26.8800, lng: 80.9350 },
+  { name: "Indira Nagar E-Waste Center", type: "Recycling", distance: "2.5 km", hours: "10AM - 5PM", materials: "Computers, Phones, Printers, Cables", color: "bg-category-recycle", phone: "+91 522-2718900", lat: 26.8700, lng: 80.9900 },
 ];
 
 const Facilities = () => {
@@ -25,20 +26,29 @@ const Facilities = () => {
           />
         </div>
 
-        {/* Map placeholder */}
-        <div className="h-48 rounded-xl bg-card border border-border mb-6 flex items-center justify-center">
-          <div className="text-center">
-            <MapPin size={32} className="text-muted-foreground mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground font-data">Interactive map coming soon</p>
-          </div>
+        {/* Lucknow Map */}
+        <div className="h-56 rounded-2xl overflow-hidden border border-border mb-6 shadow-sm">
+          <iframe
+            title="Lucknow Waste Facilities Map"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=80.85%2C26.78%2C81.08%2C26.93&layer=mapnik&marker=26.8467%2C80.9462"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            loading="lazy"
+          />
         </div>
+
+        <p className="text-xs text-muted-foreground font-data mb-4 flex items-center gap-1.5">
+          <MapPin size={12} className="text-primary" />
+          Showing facilities in Lucknow, Uttar Pradesh
+        </p>
 
         {/* Facility list */}
         <div className="space-y-3">
-          {mockFacilities.map((facility, i) => (
+          {lucknowFacilities.map((facility, i) => (
             <motion.div
               key={i}
-              className="p-4 rounded-xl bg-card border border-border"
+              className="p-4 rounded-xl glass-card"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
@@ -54,9 +64,14 @@ const Facilities = () => {
                     <span className="flex items-center gap-1"><Phone size={10} /> {facility.phone}</span>
                   </div>
                 </div>
-                <button className="p-2 rounded-lg bg-secondary border border-border text-muted-foreground hover:text-primary transition-colors">
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${facility.lat},${facility.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-lg bg-secondary border border-border text-muted-foreground hover:text-primary transition-colors"
+                >
                   <Navigation size={14} />
-                </button>
+                </a>
               </div>
             </motion.div>
           ))}
