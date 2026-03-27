@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Flame, Leaf, Trophy, Droplets } from "lucide-react";
+import EcoFingerprint from "@/components/EcoFingerprint";
 
 const mockLog = [
   { date: "Today", items: [
@@ -26,6 +27,28 @@ const MyLog = () => {
     <div className="min-h-screen bg-background pb-24 pt-6 px-4">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-display font-bold text-foreground mb-6">My Log</h1>
+
+        {/* Eco Fingerprint */}
+        <motion.div
+          className="p-5 rounded-2xl glass-card mb-6"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <p className="text-[10px] font-data text-muted-foreground uppercase tracking-[0.15em] mb-3 text-center">
+            Your Eco Fingerprint
+          </p>
+          <EcoFingerprint
+            recyclable={12}
+            compostable={5}
+            hazardous={2}
+            landfill={3}
+            upcyclable={1}
+          />
+          <p className="text-[10px] text-muted-foreground text-center mt-3 max-w-[200px] mx-auto leading-relaxed">
+            A unique pattern shaped by your scanning habits. Keep scanning to evolve it.
+          </p>
+        </motion.div>
 
         {/* Impact Summary */}
         <motion.div
