@@ -125,6 +125,9 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
               </div>
             </div>
 
+            {/* YouTube Videos */}
+            <VideoSuggestions category={result.category} itemName={result.name} />
+
             {/* Actions */}
             <div className="flex gap-3">
               <button
