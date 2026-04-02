@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, MapPin, Share2, RotateCcw, Leaf, Droplets, Zap } from "lucide-react";
 import CategoryBadge from "./CategoryBadge";
 import WasteScore from "./WasteScore";
+import VideoSuggestions from "./VideoSuggestions";
 
 export interface ScanResult {
   name: string;
