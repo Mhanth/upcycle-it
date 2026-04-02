@@ -1,17 +1,28 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Camera, Map, Users, BarChart3, Home } from "lucide-react";
-
-const navItems = [
-  { path: "/", icon: Home, label: "Home" },
-  { path: "/scan", icon: Camera, label: "Scan" },
-  { path: "/community", icon: Users, label: "Community" },
-  { path: "/facilities", icon: Map, label: "Map" },
-  { path: "/log", icon: BarChart3, label: "Log" },
-];
+import { Camera, Map, Users, BarChart3, Home, Wallet, Building2, LogIn } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NavBar = () => {
   const location = useLocation();
+  const { user, profile } = useAuth();
+
+  const isStudent = profile?.account_type === "student";
+  const isOrg = profile?.account_type === "company" || profile?.account_type === "school";
+
+  const navItems = [
+    { path: "/", icon: Home, label: "Home" },
+    { path: "/scan", icon: Camera, label: "Scan" },
+    { path: "/community", icon: Users, label: "Community" },
+    { path: "/facilities", icon: Map, label: "Map" },
+    ...(user
+      ? [
+          { path: "/log", icon: BarChart3, label: "Log" },
+          ...(isStudent ? [{ path: "/wallet", icon: Wallet, label: "Wallet" }] : []),
+          ...(isOrg ? [{ path: "/org", icon: Building2, label: "Org" }] : []),
+        ]
+      : [{ path: "/auth", icon: LogIn, label: "Login" }]),
+  ];
 
   return (
     <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
@@ -23,7 +34,7 @@ const NavBar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`relative flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-colors ${
+              className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
                 isActive ? "bg-primary/15" : "hover:bg-primary/5"
               }`}
             >

@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Camera, ArrowRight, Leaf, ChevronDown } from "lucide-react";
+import { Camera, ArrowRight, Leaf, ChevronDown, LogIn } from "lucide-react";
 import DecayTimeline from "@/components/DecayTimeline";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Landing = () => {
+  const { user } = useAuth();
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Hero — editorial, asymmetric */}
@@ -33,9 +35,20 @@ const Landing = () => {
             </div>
             <span className="text-xs font-data text-foreground/60 tracking-[0.15em] uppercase">Waste-to-Worth</span>
           </div>
-          <div className="flex items-center gap-1 text-[9px] font-data text-muted-foreground">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-glow-pulse" />
-            Lucknow, IN
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-[9px] font-data text-muted-foreground">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-glow-pulse" />
+              Lucknow, IN
+            </div>
+            {!user && (
+              <Link
+                to="/auth"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-[10px] font-display font-bold hover:bg-primary/25 transition-colors"
+              >
+                <LogIn size={12} />
+                Login
+              </Link>
+            )}
           </div>
         </motion.div>
 
