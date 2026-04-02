@@ -4,6 +4,7 @@ import { Camera, ArrowRight, Leaf, ChevronDown } from "lucide-react";
 import DecayTimeline from "@/components/DecayTimeline";
 
 const Landing = () => {
+  const { user } = useAuth();
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Hero — editorial, asymmetric */}
