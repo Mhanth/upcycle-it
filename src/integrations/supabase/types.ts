@@ -14,16 +14,210 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      carbon_credits: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_scan_date: string | null
+          longest_streak: number
+          total_credits: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_scan_date?: string | null
+          longest_streak?: number
+          total_credits?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_scan_date?: string | null
+          longest_streak?: number
+          total_credits?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      organization_members: {
+        Row: {
+          id: string
+          joined_at: string
+          organization_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          organization_id: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          organization_id?: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          invite_code: string
+          logo_url: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          invite_code?: string
+          logo_url?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          invite_code?: string
+          logo_url?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scan_history: {
+        Row: {
+          carbon_saved: number
+          category: Database["public"]["Enums"]["waste_category"]
+          created_at: string
+          credits_earned: number
+          disposal_method: string | null
+          id: string
+          image_url: string | null
+          item_name: string
+          material: string | null
+          organization_id: string | null
+          user_id: string
+        }
+        Insert: {
+          carbon_saved?: number
+          category: Database["public"]["Enums"]["waste_category"]
+          created_at?: string
+          credits_earned?: number
+          disposal_method?: string | null
+          id?: string
+          image_url?: string | null
+          item_name: string
+          material?: string | null
+          organization_id?: string | null
+          user_id: string
+        }
+        Update: {
+          carbon_saved?: number
+          category?: Database["public"]["Enums"]["waste_category"]
+          created_at?: string
+          credits_earned?: number
+          disposal_method?: string | null
+          id?: string
+          image_url?: string | null
+          item_name?: string
+          material?: string | null
+          organization_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_org_admin: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_org_member: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      account_type: "student" | "individual" | "company" | "school"
+      org_role: "admin" | "member"
+      waste_category:
+        | "recyclable"
+        | "compostable"
+        | "hazardous"
+        | "landfill"
+        | "upcyclable"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +344,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_type: ["student", "individual", "company", "school"],
+      org_role: ["admin", "member"],
+      waste_category: [
+        "recyclable",
+        "compostable",
+        "hazardous",
+        "landfill",
+        "upcyclable",
+      ],
+    },
   },
 } as const
