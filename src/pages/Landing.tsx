@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Camera, ArrowRight, Leaf, ChevronDown } from "lucide-react";
+import { Camera, ArrowRight, Leaf, ChevronDown, LogIn } from "lucide-react";
 import DecayTimeline from "@/components/DecayTimeline";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Landing = () => {
   const { user } = useAuth();
