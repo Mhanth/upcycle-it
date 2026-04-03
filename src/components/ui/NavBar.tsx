@@ -1,27 +1,22 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Camera, Map, Users, BarChart3, Home, Wallet, Building2, LogIn } from "lucide-react";
+import { Camera, Map, Users, Home, Flame, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NavBar = () => {
   const location = useLocation();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
 
-  const isStudent = profile?.account_type === "student";
-  const isOrg = profile?.account_type === "company" || profile?.account_type === "school";
+  // Hide navbar on scanner page for immersive experience
+  if (location.pathname === "/scan") return null;
 
   const navItems = [
     { path: "/", icon: Home, label: "Home" },
     { path: "/scan", icon: Camera, label: "Scan" },
-    { path: "/community", icon: Users, label: "Community" },
+    { path: "/friends", icon: Flame, label: "Streaks" },
+    { path: "/community", icon: Users, label: "Hub" },
     { path: "/facilities", icon: Map, label: "Map" },
-    ...(user
-      ? [
-          { path: "/log", icon: BarChart3, label: "Log" },
-          ...(isStudent ? [{ path: "/wallet", icon: Wallet, label: "Wallet" }] : []),
-          ...(isOrg ? [{ path: "/org", icon: Building2, label: "Org" }] : []),
-        ]
-      : [{ path: "/auth", icon: LogIn, label: "Login" }]),
+    ...(user ? [] : [{ path: "/auth", icon: LogIn, label: "Login" }]),
   ];
 
   return (

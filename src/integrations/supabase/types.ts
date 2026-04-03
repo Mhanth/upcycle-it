@@ -47,6 +47,45 @@ export type Database = {
         }
         Relationships: []
       }
+      friendships: {
+        Row: {
+          created_at: string
+          id: string
+          last_interaction_at: string | null
+          receiver_id: string
+          receiver_last_shared: string | null
+          requester_id: string
+          requester_last_shared: string | null
+          status: string
+          streak_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_interaction_at?: string | null
+          receiver_id: string
+          receiver_last_shared?: string | null
+          requester_id: string
+          requester_last_shared?: string | null
+          status?: string
+          streak_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_interaction_at?: string | null
+          receiver_id?: string
+          receiver_last_shared?: string | null
+          requester_id?: string
+          requester_last_shared?: string | null
+          status?: string
+          streak_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       organization_members: {
         Row: {
           id: string
@@ -118,6 +157,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          friend_code: string | null
           id: string
           total_xp: number
           updated_at: string
@@ -128,6 +168,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          friend_code?: string | null
           id?: string
           total_xp?: number
           updated_at?: string
@@ -138,6 +179,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          friend_code?: string | null
           id?: string
           total_xp?: number
           updated_at?: string
@@ -191,6 +233,44 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scan_shares: {
+        Row: {
+          created_at: string
+          from_user_id: string
+          id: string
+          message: string | null
+          scan_id: string
+          seen: boolean
+          to_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_user_id: string
+          id?: string
+          message?: string | null
+          scan_id: string
+          seen?: boolean
+          to_user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          message?: string | null
+          scan_id?: string
+          seen?: boolean
+          to_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_shares_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scan_history"
             referencedColumns: ["id"]
           },
         ]

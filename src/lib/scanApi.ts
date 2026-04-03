@@ -42,7 +42,7 @@ export async function scanWasteImage(imageBase64: string): Promise<ScanResult> {
       const co2Num = parseFloat(result.impact.co2) || 0;
 
       // Save scan history
-      await supabase.from("scan_history").insert({
+      const { data: scanRow } = await supabase.from("scan_history").insert({
         user_id: user.id,
         item_name: result.name,
         category: result.category.toLowerCase() as any,
@@ -50,7 +50,11 @@ export async function scanWasteImage(imageBase64: string): Promise<ScanResult> {
         material: result.material,
         carbon_saved: co2Num,
         credits_earned: credits,
-      });
+      }).select("id").single();
+
+      if (scanRow) {
+        result.scanId = scanRow.id;
+      }
 
       // Update carbon credits
       const today = new Date().toISOString().split("T")[0];
