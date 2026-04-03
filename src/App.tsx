@@ -13,7 +13,6 @@ import MyLog from "./pages/MyLog";
 import Auth from "./pages/Auth";
 import CarbonWallet from "./pages/CarbonWallet";
 import OrgDashboard from "./pages/OrgDashboard";
-import Friends from "./pages/Friends";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +28,6 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/scan" element={<Scanner />} />
-            <Route path="/friends" element={<Friends />} />
             <Route path="/community" element={<Community />} />
             <Route path="/facilities" element={<Facilities />} />
             <Route path="/log" element={<MyLog />} />
