@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, Share2, RotateCcw, Leaf, Droplets, Zap } from "lucide-react";
+import { X, MapPin, RotateCcw, Leaf, Droplets, Zap, Send } from "lucide-react";
 import CategoryBadge from "./CategoryBadge";
 import WasteScore from "./WasteScore";
 import VideoSuggestions from "./VideoSuggestions";
+import ShareToFriend from "./ShareToFriend";
 
 export interface ScanResult {
   name: string;
@@ -13,6 +15,7 @@ export interface ScanResult {
   disposalSteps: string[];
   upcycleIdeas: { title: string; difficulty: string; time: string }[];
   impact: { co2: string; water: string; readable: string };
+  scanId?: string;
 }
 
 interface ResultSheetProps {
