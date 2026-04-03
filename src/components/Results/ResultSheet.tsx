@@ -144,10 +144,15 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
               <button className="px-4 py-3 rounded-xl bg-secondary text-secondary-foreground border border-border">
                 <MapPin size={16} />
               </button>
-              <button className="px-4 py-3 rounded-xl bg-secondary text-secondary-foreground border border-border">
-                <Share2 size={16} />
+              <button
+                onClick={() => setShareOpen(true)}
+                className="px-4 py-3 rounded-xl bg-orange-500/10 text-orange-600 border border-orange-500/20 hover:bg-orange-500/20 transition-colors"
+              >
+                <Send size={16} />
               </button>
             </div>
+
+            <ShareToFriend scanId={result?.scanId || null} open={shareOpen} onClose={() => setShareOpen(false)} />
           </div>
         </motion.div>
       )}
