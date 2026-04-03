@@ -25,6 +25,7 @@ interface ResultSheetProps {
 }
 
 const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
+  const [shareOpen, setShareOpen] = useState(false);
   return (
     <AnimatePresence>
       {result && (
