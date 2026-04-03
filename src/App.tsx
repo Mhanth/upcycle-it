@@ -13,6 +13,7 @@ import MyLog from "./pages/MyLog";
 import Auth from "./pages/Auth";
 import CarbonWallet from "./pages/CarbonWallet";
 import OrgDashboard from "./pages/OrgDashboard";
+import Friends from "./pages/Friends";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
