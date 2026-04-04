@@ -23,6 +23,7 @@ interface ResultSheetProps {
 }
 
 const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
+  const navigate = useNavigate();
   return (
     <AnimatePresence>
       {result && (
