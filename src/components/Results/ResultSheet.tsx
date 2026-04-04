@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, Share2, RotateCcw, Leaf, Droplets, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { X, MapPin, Share2, RotateCcw, Leaf, Droplets, Zap, ShoppingBag } from "lucide-react";
 import CategoryBadge from "./CategoryBadge";
 import WasteScore from "./WasteScore";
 import VideoSuggestions from "./VideoSuggestions";
