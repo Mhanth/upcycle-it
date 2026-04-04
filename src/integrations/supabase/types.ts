@@ -86,6 +86,63 @@ export type Database = {
         }
         Relationships: []
       }
+      listings: {
+        Row: {
+          category: string
+          contact_email: string | null
+          contact_whatsapp: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          images: string[] | null
+          is_free: boolean | null
+          location_city: string | null
+          location_state: string | null
+          price: number | null
+          status: string | null
+          title: string
+          user_id: string
+          views: number | null
+          waste_type: string | null
+        }
+        Insert: {
+          category: string
+          contact_email?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          is_free?: boolean | null
+          location_city?: string | null
+          location_state?: string | null
+          price?: number | null
+          status?: string | null
+          title: string
+          user_id: string
+          views?: number | null
+          waste_type?: string | null
+        }
+        Update: {
+          category?: string
+          contact_email?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          is_free?: boolean | null
+          location_city?: string | null
+          location_state?: string | null
+          price?: number | null
+          status?: string | null
+          title?: string
+          user_id?: string
+          views?: number | null
+          waste_type?: string | null
+        }
+        Relationships: []
+      }
       organization_members: {
         Row: {
           id: string
@@ -186,6 +243,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      saved_listings: {
+        Row: {
+          created_at: string | null
+          id: string
+          listing_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          listing_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          listing_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_listings_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scan_history: {
         Row: {
