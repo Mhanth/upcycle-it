@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Camera, Map, Users, BarChart3, Home, Wallet, Building2, LogIn } from "lucide-react";
+import { Camera, Map, Users, BarChart3, Home, Wallet, Building2, LogIn, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NavBar = () => {
@@ -13,6 +13,7 @@ const NavBar = () => {
   const navItems = [
     { path: "/", icon: Home, label: "Home" },
     { path: "/scan", icon: Camera, label: "Scan" },
+    { path: "/marketplace", icon: ShoppingBag, label: "Market" },
     { path: "/community", icon: Users, label: "Community" },
     { path: "/facilities", icon: Map, label: "Map" },
     ...(user

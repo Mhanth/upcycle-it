@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, Share2, RotateCcw, Leaf, Droplets, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { X, MapPin, Share2, RotateCcw, Leaf, Droplets, Zap, ShoppingBag } from "lucide-react";
 import CategoryBadge from "./CategoryBadge";
 import WasteScore from "./WasteScore";
 import VideoSuggestions from "./VideoSuggestions";
@@ -22,6 +23,7 @@ interface ResultSheetProps {
 }
 
 const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
+  const navigate = useNavigate();
   return (
     <AnimatePresence>
       {result && (
@@ -129,7 +131,7 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
             <VideoSuggestions category={result.category} itemName={result.name} />
 
             {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 mb-3">
               <button
                 onClick={onScanAgain}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold"
@@ -144,6 +146,15 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
                 <Share2 size={16} />
               </button>
             </div>
+
+            {/* List as upcycled CTA */}
+            <button
+              onClick={() => navigate(`/marketplace/new?waste_type=${encodeURIComponent(result.material || result.name)}`)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-category-upcycle/15 text-category-upcycle border border-category-upcycle/20 font-display font-bold text-sm hover:bg-category-upcycle/25 transition-colors"
+            >
+              <ShoppingBag size={16} />
+              List This as Upcycled
+            </button>
           </div>
         </motion.div>
       )}
