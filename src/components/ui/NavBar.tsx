@@ -13,6 +13,7 @@ const NavBar = () => {
   const navItems = [
     { path: "/", icon: Home, label: "Home" },
     { path: "/scan", icon: Camera, label: "Scan" },
+    { path: "/marketplace", icon: ShoppingBag, label: "Market" },
     { path: "/community", icon: Users, label: "Community" },
     { path: "/facilities", icon: Map, label: "Map" },
     ...(user

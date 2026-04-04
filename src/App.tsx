@@ -37,6 +37,10 @@ const App = () => (
             <Route path="/log" element={<MyLog />} />
             <Route path="/wallet" element={<CarbonWallet />} />
             <Route path="/org" element={<OrgDashboard />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/marketplace/new" element={<MarketplaceNew />} />
+            <Route path="/marketplace/my" element={<MyListings />} />
+            <Route path="/marketplace/:id" element={<MarketplaceDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <NavBar />
