@@ -9,6 +9,7 @@ interface Profile {
   avatar_url: string | null;
   account_type: "student" | "individual" | "company" | "school";
   total_xp: number;
+  friend_code: string | null;
 }
 
 interface AuthContextType {

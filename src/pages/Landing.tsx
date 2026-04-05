@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const Landing = () => {
   const { user } = useAuth();
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 lg:pt-16">
       {/* Hero — editorial, asymmetric */}
       <section className="relative min-h-[94vh] flex flex-col justify-end px-6 pb-12 overflow-hidden">
         {/* Large decorative text in background */}

@@ -134,8 +134,8 @@ const OrgDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-24 pt-6 px-4">
-        <div className="max-w-2xl mx-auto space-y-4">
+      <div className="min-h-screen bg-background pb-24 pt-6 lg:pt-24 px-4">
+        <div className="max-w-4xl mx-auto space-y-4">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-36 rounded-2xl" />
           <Skeleton className="h-24 rounded-2xl" />
@@ -146,8 +146,8 @@ const OrgDashboard = () => {
 
   if (!org) {
     return (
-      <div className="min-h-screen bg-background pb-24 pt-6 px-4">
-        <div className="max-w-2xl mx-auto">
+      <div className="min-h-screen bg-background pb-24 pt-6 lg:pt-24 px-4">
+        <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl font-display font-bold text-foreground mb-6">Organization</h1>
 
           <div className="space-y-4">
@@ -209,8 +209,8 @@ const OrgDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24 pt-6 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-background pb-24 pt-6 lg:pt-24 px-4">
+      <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-display font-bold text-foreground mb-6">{org.name}</h1>
 
         {/* Invite code banner */}

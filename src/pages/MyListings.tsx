@@ -64,7 +64,7 @@ const MyListings = () => {
   const activeCount = listings.filter((l) => l.status === "active").length;
 
   return (
-    <div className="min-h-screen bg-background pb-28 pt-6 px-4 max-w-lg mx-auto">
+    <div className="min-h-screen bg-background pb-28 pt-6 lg:pt-24 px-4 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-display font-bold text-foreground">My Listings</h1>
         <Link

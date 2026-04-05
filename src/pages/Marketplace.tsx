@@ -95,7 +95,7 @@ const Marketplace = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-28 pt-6 px-4 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-background pb-28 pt-6 lg:pt-24 px-4 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-display font-bold text-foreground">Upcycle Marketplace</h1>

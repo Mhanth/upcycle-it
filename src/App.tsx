@@ -17,6 +17,7 @@ import Marketplace from "./pages/Marketplace";
 import MarketplaceNew from "./pages/MarketplaceNew";
 import MarketplaceDetail from "./pages/MarketplaceDetail";
 import MyListings from "./pages/MyListings";
+import Friends from "./pages/Friends";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/marketplace/new" element={<MarketplaceNew />} />
             <Route path="/marketplace/my" element={<MyListings />} />
             <Route path="/marketplace/:id" element={<MarketplaceDetail />} />
+            <Route path="/friends" element={<Friends />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <NavBar />
