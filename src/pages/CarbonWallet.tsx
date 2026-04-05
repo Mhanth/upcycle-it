@@ -51,8 +51,8 @@ const CarbonWallet = () => {
   const maxBar = weeklyMock.reduce((m, d) => Math.max(m, d.credits), 1);
 
   return (
-    <div className="min-h-screen bg-background pb-24 pt-6 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-background pb-24 pt-6 lg:pt-24 px-4">
+      <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-display font-bold text-foreground mb-6">Carbon Wallet</h1>
 
         {loading ? (

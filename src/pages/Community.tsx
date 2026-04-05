@@ -19,8 +19,8 @@ const mockPosts = [
 
 const Community = () => {
   return (
-    <div className="min-h-screen bg-background pb-24 pt-6 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-background pb-24 pt-6 lg:pt-24 px-4">
+      <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-display font-bold text-foreground">Community</h1>
           <button className="p-2 rounded-xl glass-card text-muted-foreground hover:text-foreground transition-colors">
@@ -42,7 +42,7 @@ const Community = () => {
         </motion.div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {mockPosts.map((post, i) => (
             <motion.div
               key={post.id}

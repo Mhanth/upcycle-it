@@ -123,7 +123,7 @@ const MarketplaceNew = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-28 pt-6 px-4 max-w-lg mx-auto">
+    <div className="min-h-screen bg-background pb-28 pt-6 lg:pt-24 px-4 max-w-lg mx-auto">
       <h1 className="text-2xl font-display font-bold text-foreground mb-6">Create Listing</h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
