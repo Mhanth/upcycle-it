@@ -21,6 +21,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [accountType, setAccountType] = useState("individual");
+  const [schoolCode, setSchoolCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -35,6 +36,16 @@ const Auth = () => {
         navigate("/scan");
       } else if (view === "signup") {
         await signUp(email, password, displayName, accountType);
+        // If student with school code, auto-join the school org
+        if ((accountType === "student" || accountType === "school") && schoolCode.trim()) {
+          try {
+            // Small delay to let auth settle
+            await new Promise(r => setTimeout(r, 500));
+            const { error: joinErr } = await supabase.rpc("join_org_by_code", { _invite_code: schoolCode.trim() });
+            if (joinErr) toast.error("Could not join school: " + joinErr.message);
+            else toast.success("Joined your school successfully!");
+          } catch {}
+        }
         toast.success("Account created! Welcome to W2W!");
         navigate("/scan");
       } else {
@@ -130,6 +141,21 @@ const Auth = () => {
                     })}
                   </div>
                 </div>
+
+                {/* School code for students */}
+                {(accountType === "student" || accountType === "school") && (
+                  <div className="relative">
+                    <School size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="School / University code"
+                      value={schoolCode}
+                      onChange={(e) => setSchoolCode(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-background border border-border text-foreground text-sm font-body placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                    <p className="text-[10px] text-muted-foreground mt-1 ml-1">Ask your school admin for the code</p>
+                  </div>
+                )}
               </>
             )}
 
