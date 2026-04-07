@@ -111,24 +111,6 @@ const Landing = () => {
           <ChevronDown size={16} className="text-muted-foreground/40" />
         </motion.div>
 
-        {/* Stats strip — horizontally laid, editorial */}
-        <motion.div
-          className="absolute bottom-4 right-6 z-10 flex items-end gap-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          {[
-            { value: "12.8k", label: "scans" },
-            { value: "3.2t", label: "diverted" },
-            { value: "89%", label: "accuracy" },
-          ].map((stat, i) => (
-            <div key={i} className="text-right">
-              <div className="text-lg font-display font-bold text-foreground tabular-nums leading-none">{stat.value}</div>
-              <div className="text-[8px] font-data text-muted-foreground uppercase tracking-wider mt-0.5">{stat.label}</div>
-            </div>
-          ))}
-        </motion.div>
       </section>
 
       {/* Decay Timeline — the USP */}

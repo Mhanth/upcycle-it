@@ -11,6 +11,7 @@ import Community from "./pages/Community";
 import Facilities from "./pages/Facilities";
 import MyLog from "./pages/MyLog";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import CarbonWallet from "./pages/CarbonWallet";
 import OrgDashboard from "./pages/OrgDashboard";
 import Marketplace from "./pages/Marketplace";
@@ -32,6 +33,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/scan" element={<Scanner />} />
             <Route path="/community" element={<Community />} />
             <Route path="/facilities" element={<Facilities />} />
