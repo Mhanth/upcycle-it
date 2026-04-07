@@ -374,6 +374,7 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      join_org_by_code: { Args: { _invite_code: string }; Returns: string }
     }
     Enums: {
       account_type: "student" | "individual" | "company" | "school"
