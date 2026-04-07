@@ -36,6 +36,16 @@ const Auth = () => {
         navigate("/scan");
       } else if (view === "signup") {
         await signUp(email, password, displayName, accountType);
+        // If student with school code, auto-join the school org
+        if ((accountType === "student" || accountType === "school") && schoolCode.trim()) {
+          try {
+            // Small delay to let auth settle
+            await new Promise(r => setTimeout(r, 500));
+            const { error: joinErr } = await supabase.rpc("join_org_by_code", { _invite_code: schoolCode.trim() });
+            if (joinErr) toast.error("Could not join school: " + joinErr.message);
+            else toast.success("Joined your school successfully!");
+          } catch {}
+        }
         toast.success("Account created! Welcome to W2W!");
         navigate("/scan");
       } else {
