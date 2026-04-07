@@ -35,7 +35,8 @@ const Auth = () => {
         navigate("/scan");
       } else if (view === "signup") {
         await signUp(email, password, displayName, accountType);
-        toast.success("Check your email to verify your account!");
+        toast.success("Account created! Welcome to W2W!");
+        navigate("/scan");
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
