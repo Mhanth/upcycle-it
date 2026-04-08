@@ -75,11 +75,11 @@ const OrgDashboard = () => {
       .select("user_id, display_name")
       .in("user_id", memberIds);
 
-    // Get scan stats per member (from scan_history where org matches)
+    // Get scan stats per member (from scan_history — both org-tagged and by user_id)
     const { data: scans } = await supabase
       .from("scan_history")
       .select("user_id, credits_earned, carbon_saved")
-      .eq("organization_id", orgData.id);
+      .in("user_id", memberIds);
 
     // Get credits for members
     const { data: credits } = await supabase
