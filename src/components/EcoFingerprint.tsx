@@ -7,9 +7,10 @@ interface EcoFingerprintProps {
   hazardous: number;
   landfill: number;
   upcyclable: number;
+  showLegend?: boolean;
 }
 
-const EcoFingerprint = ({ recyclable, compostable, hazardous, landfill, upcyclable }: EcoFingerprintProps) => {
+const EcoFingerprint = ({ recyclable, compostable, hazardous, landfill, upcyclable, showLegend = true }: EcoFingerprintProps) => {
   const total = recyclable + compostable + hazardous + landfill + upcyclable || 1;
 
   const rings = useMemo(() => {
@@ -116,15 +117,16 @@ const EcoFingerprint = ({ recyclable, compostable, hazardous, landfill, upcyclab
         <circle cx="100" cy="100" r="3" fill="hsl(var(--background))" />
       </svg>
 
-      {/* Legend */}
-      <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 mt-3">
-        {rings.filter(r => r.value > 0).map(ring => (
-          <div key={ring.label} className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ring.color }} />
-            <span className="text-[9px] font-data text-muted-foreground">{ring.label} {ring.value}</span>
-          </div>
-        ))}
-      </div>
+      {showLegend && (
+        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 mt-3">
+          {rings.filter(r => r.value > 0).map(ring => (
+            <div key={ring.label} className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ring.color }} />
+              <span className="text-[9px] font-data text-muted-foreground">{ring.label} {ring.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
