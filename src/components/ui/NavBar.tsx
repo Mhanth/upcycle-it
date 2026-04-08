@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Camera, Map, Users, BarChart3, Home, Wallet, Building2, LogIn, ShoppingBag, UserPlus, Menu, X, Leaf } from "lucide-react";
+import { Camera, Map, Users, BarChart3, Home, Wallet, Building2, LogIn, ShoppingBag, UserPlus, Menu, X, Leaf, GraduationCap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -22,10 +22,11 @@ const NavBar = () => {
     { path: "/facilities", icon: Map, label: "Facilities" },
     ...(user
       ? [
-          { path: "/friends", icon: UserPlus, label: "Friends" },
+          ...(isOrg
+            ? [{ path: "/org", icon: GraduationCap, label: "Students" }]
+            : [{ path: "/friends", icon: UserPlus, label: "Friends" }]),
           { path: "/log", icon: BarChart3, label: "My Log" },
           ...(isStudent ? [{ path: "/wallet", icon: Wallet, label: "Wallet" }] : []),
-          ...(isOrg ? [{ path: "/org", icon: Building2, label: "Org" }] : []),
         ]
       : [{ path: "/auth", icon: LogIn, label: "Login" }]),
   ];
