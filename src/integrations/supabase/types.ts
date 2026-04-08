@@ -366,6 +366,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_org: { Args: { _name: string }; Returns: string }
       is_org_admin: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
@@ -375,6 +376,10 @@ export type Database = {
         Returns: boolean
       }
       join_org_by_code: { Args: { _invite_code: string }; Returns: string }
+      remove_org_member: {
+        Args: { _member_user_id: string; _org_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       account_type: "student" | "individual" | "company" | "school"
