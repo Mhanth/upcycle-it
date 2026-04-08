@@ -22,10 +22,11 @@ const NavBar = () => {
     { path: "/facilities", icon: Map, label: "Facilities" },
     ...(user
       ? [
-          { path: "/friends", icon: UserPlus, label: "Friends" },
+          ...(isOrg
+            ? [{ path: "/org", icon: GraduationCap, label: "Students" }]
+            : [{ path: "/friends", icon: UserPlus, label: "Friends" }]),
           { path: "/log", icon: BarChart3, label: "My Log" },
           ...(isStudent ? [{ path: "/wallet", icon: Wallet, label: "Wallet" }] : []),
-          ...(isOrg ? [{ path: "/org", icon: Building2, label: "Org" }] : []),
         ]
       : [{ path: "/auth", icon: LogIn, label: "Login" }]),
   ];
