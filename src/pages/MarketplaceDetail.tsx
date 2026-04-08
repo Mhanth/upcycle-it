@@ -103,11 +103,15 @@ const MarketplaceDetail = () => {
   return (
     <div className="min-h-screen bg-background pb-28">
       {/* Image Gallery */}
-      <div className="relative aspect-square bg-muted">
+      <div className="relative mx-auto w-full max-w-3xl bg-muted overflow-hidden md:rounded-b-2xl">
         {images.length > 0 ? (
-          <img src={images[imgIdx]} alt={listing.title} className="w-full h-full object-cover" />
+          <img
+            src={images[imgIdx]}
+            alt={listing.title}
+            className="w-full h-auto max-h-[70vh] object-contain bg-muted"
+          />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-5xl">♻️</div>
+          <div className="w-full h-[260px] sm:h-[360px] md:h-[440px] flex items-center justify-center text-5xl">♻️</div>
         )}
 
         {/* Back button */}
@@ -142,7 +146,7 @@ const MarketplaceDetail = () => {
         )}
       </div>
 
-      <div className="px-4 pt-4 max-w-lg mx-auto">
+      <div className="px-4 pt-4 max-w-3xl mx-auto">
         {/* Price & Title */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
