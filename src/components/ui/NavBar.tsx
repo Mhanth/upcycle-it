@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Camera, Map, Users, BarChart3, Home, Wallet, Building2, LogIn, ShoppingBag, UserPlus, Menu, X, Leaf } from "lucide-react";
+import { Camera, Map, Users, BarChart3, Home, Wallet, Building2, LogIn, ShoppingBag, UserPlus, Menu, X, Leaf, GraduationCap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
