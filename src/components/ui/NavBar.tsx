@@ -18,7 +18,7 @@ const NavBar = () => {
     { path: "/", icon: Home, label: "Home" },
     { path: "/scan", icon: Camera, label: "Scan" },
     { path: "/marketplace", icon: ShoppingBag, label: "Marketplace" },
-    { path: "/community", icon: Users, label: "Community" },
+    
     { path: "/facilities", icon: Map, label: "Facilities" },
     ...(user
       ? [

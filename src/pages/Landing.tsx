@@ -68,9 +68,6 @@ const Landing = () => {
                 </motion.button>
               </Link>
 
-              <Link to="/community" className="text-xs font-data text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4 decoration-border">
-                Explore community
-              </Link>
             </div>
           </motion.div>
 
