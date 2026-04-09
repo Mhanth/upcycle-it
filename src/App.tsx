@@ -7,7 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import NavBar from "@/components/ui/NavBar";
 import Landing from "./pages/Landing";
 import Scanner from "./pages/Scanner";
-import Community from "./pages/Community";
+
 import Facilities from "./pages/Facilities";
 import MyLog from "./pages/MyLog";
 import Auth from "./pages/Auth";
@@ -35,7 +35,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/scan" element={<Scanner />} />
-            <Route path="/community" element={<Community />} />
+            
             <Route path="/facilities" element={<Facilities />} />
             <Route path="/log" element={<MyLog />} />
             <Route path="/wallet" element={<CarbonWallet />} />
