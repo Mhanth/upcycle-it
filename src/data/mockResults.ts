@@ -1,6 +1,5 @@
-import type { ScanResult } from "@/components/Results/ResultSheet";
-
-export const mockResults: ScanResult[] = [
+// Legacy mock data — kept for reference only.
+export const mockResults: any[] = [
   {
     name: "PET Plastic Bottle",
     confidence: 94,
@@ -93,6 +92,6 @@ export const mockResults: ScanResult[] = [
   },
 ];
 
-export const getRandomResult = (): ScanResult => {
+export const getRandomResult = (): any => {
   return mockResults[Math.floor(Math.random() * mockResults.length)];
 };

@@ -154,7 +154,7 @@ const Friends = () => {
     try {
       const normalizedCode = addCode.trim().toUpperCase();
 
-      const { error } = await supabase.rpc("create_friend_request_by_code", {
+      const { error } = await (supabase.rpc as any)("create_friend_request_by_code", {
         _friend_code: normalizedCode,
       });
 

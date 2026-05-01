@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Building2, Copy, School } from "lucide-react";
+import { Building2, Copy, School, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import OrgStats from "@/components/OrgDashboard/OrgStats";
 import Leaderboard, { type MemberStat } from "@/components/OrgDashboard/Leaderboard";
 import StudentManagement from "@/components/OrgDashboard/StudentManagement";
 import ExportReport from "@/components/OrgDashboard/ExportReport";
+import { isCityKnown } from "@/data/municipalRules";
 
 interface OrgData {
   id: string;
@@ -28,11 +29,26 @@ const OrgDashboard = () => {
   const [createMode, setCreateMode] = useState(false);
   const [orgName, setOrgName] = useState("");
   const [joinCode, setJoinCode] = useState("");
+  const [city, setCity] = useState<string>("");
 
   useEffect(() => {
     if (!user) return;
     fetchOrg();
   }, [user]);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`, { headers: { "Accept-Language": "en" } });
+          const j = await r.json();
+          setCity(j?.address?.city || j?.address?.town || j?.address?.village || "");
+        } catch { /* silent */ }
+      },
+      () => {}
+    );
+  }, []);
 
   const fetchOrg = async () => {
     const { data: membership } = await supabase
@@ -222,6 +238,15 @@ const OrgDashboard = () => {
             />
           )}
         </div>
+
+        {city && isCityKnown(city) && (
+          <div className="mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-category-compost/15 border border-category-compost/30">
+            <ShieldCheck size={12} className="text-category-compost" />
+            <span className="text-[10px] font-display font-bold text-category-compost uppercase tracking-wider">
+              Municipal Compliance Mode: {city}
+            </span>
+          </div>
+        )}
 
         {isAdmin && (
           <motion.div className="p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

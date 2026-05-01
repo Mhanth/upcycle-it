@@ -5,7 +5,10 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[]
+
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
@@ -278,10 +281,13 @@ export type Database = {
           credits_earned: number
           disposal_method: string | null
           id: string
+          image_hash: string | null
           image_url: string | null
           item_name: string
           material: string | null
           organization_id: string | null
+          reduced_credits: boolean | null
+          source: string | null
           user_id: string
         }
         Insert: {
@@ -291,10 +297,13 @@ export type Database = {
           credits_earned?: number
           disposal_method?: string | null
           id?: string
+          image_hash?: string | null
           image_url?: string | null
           item_name: string
           material?: string | null
           organization_id?: string | null
+          reduced_credits?: boolean | null
+          source?: string | null
           user_id: string
         }
         Update: {
@@ -304,10 +313,13 @@ export type Database = {
           credits_earned?: number
           disposal_method?: string | null
           id?: string
+          image_hash?: string | null
           image_url?: string | null
           item_name?: string
           material?: string | null
           organization_id?: string | null
+          reduced_credits?: boolean | null
+          source?: string | null
           user_id?: string
         }
         Relationships: [
@@ -363,10 +375,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_friend_request_by_code: {
-        Args: { _friend_code: string }
-        Returns: string
-      }
       create_org: { Args: { _name: string }; Returns: string }
       is_org_admin: {
         Args: { _org_id: string; _user_id: string }

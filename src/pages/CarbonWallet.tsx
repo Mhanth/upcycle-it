@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Zap, Flame, Trophy, TrendingUp, Award, Crown, Shield, Star } from "lucide-react";
+import { Zap, Flame, Trophy, TrendingUp, Award, Crown, Shield, Star, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +26,8 @@ const CarbonWallet = () => {
   const { user, profile } = useAuth();
   const [credits, setCredits] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [verifiedCount, setVerifiedCount] = useState(0);
+  const [verifiedRecent, setVerifiedRecent] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -36,6 +38,16 @@ const CarbonWallet = () => {
         .eq("user_id", user.id)
         .single();
       setCredits(data);
+
+      const { data: verified } = await (supabase
+        .from("scan_history") as any)
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("source", "verified_dropoff")
+        .order("created_at", { ascending: false });
+      setVerifiedCount(verified?.length || 0);
+      setVerifiedRecent((verified || []).slice(0, 5));
+
       setLoading(false);
     };
     fetch();
@@ -201,6 +213,33 @@ const CarbonWallet = () => {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Verified Drop-offs */}
+            <div className="mt-6 p-4 rounded-xl glass-card">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-data text-muted-foreground uppercase tracking-wider">Verified Drop-offs</p>
+                <span className="text-xs font-data text-category-compost font-bold flex items-center gap-1">
+                  <CheckCircle2 size={12} /> {verifiedCount}
+                </span>
+              </div>
+              {verifiedRecent.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Log a drop-off at a facility to earn 2x CC.</p>
+              ) : (
+                <div className="space-y-2">
+                  {verifiedRecent.map((v: any) => (
+                    <div key={v.id} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-data bg-category-compost/15 text-category-compost border border-category-compost/30 flex-shrink-0">
+                          Verified ✓
+                        </span>
+                        <span className="text-foreground truncate">{v.item_name}</span>
+                      </div>
+                      <span className="font-data text-primary font-bold flex-shrink-0">+{v.credits_earned}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}
