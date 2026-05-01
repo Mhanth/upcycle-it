@@ -214,6 +214,33 @@ const CarbonWallet = () => {
                 ))}
               </div>
             </div>
+
+            {/* Verified Drop-offs */}
+            <div className="mt-6 p-4 rounded-xl glass-card">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-data text-muted-foreground uppercase tracking-wider">Verified Drop-offs</p>
+                <span className="text-xs font-data text-category-compost font-bold flex items-center gap-1">
+                  <CheckCircle2 size={12} /> {verifiedCount}
+                </span>
+              </div>
+              {verifiedRecent.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Log a drop-off at a facility to earn 2x CC.</p>
+              ) : (
+                <div className="space-y-2">
+                  {verifiedRecent.map((v: any) => (
+                    <div key={v.id} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-data bg-category-compost/15 text-category-compost border border-category-compost/30 flex-shrink-0">
+                          Verified ✓
+                        </span>
+                        <span className="text-foreground truncate">{v.item_name}</span>
+                      </div>
+                      <span className="font-data text-primary font-bold flex-shrink-0">+{v.credits_earned}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>
