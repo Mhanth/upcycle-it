@@ -281,10 +281,13 @@ export type Database = {
           credits_earned: number
           disposal_method: string | null
           id: string
+          image_hash: string | null
           image_url: string | null
           item_name: string
           material: string | null
           organization_id: string | null
+          reduced_credits: boolean | null
+          source: string | null
           user_id: string
         }
         Insert: {
@@ -294,10 +297,13 @@ export type Database = {
           credits_earned?: number
           disposal_method?: string | null
           id?: string
+          image_hash?: string | null
           image_url?: string | null
           item_name: string
           material?: string | null
           organization_id?: string | null
+          reduced_credits?: boolean | null
+          source?: string | null
           user_id: string
         }
         Update: {
@@ -307,10 +313,13 @@ export type Database = {
           credits_earned?: number
           disposal_method?: string | null
           id?: string
+          image_hash?: string | null
           image_url?: string | null
           item_name?: string
           material?: string | null
           organization_id?: string | null
+          reduced_credits?: boolean | null
+          source?: string | null
           user_id?: string
         }
         Relationships: [
