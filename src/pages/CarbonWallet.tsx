@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Zap, Flame, Trophy, TrendingUp, Award, Crown, Shield, Star } from "lucide-react";
+import { Zap, Flame, Trophy, TrendingUp, Award, Crown, Shield, Star, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +26,8 @@ const CarbonWallet = () => {
   const { user, profile } = useAuth();
   const [credits, setCredits] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [verifiedCount, setVerifiedCount] = useState(0);
+  const [verifiedRecent, setVerifiedRecent] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -36,6 +38,16 @@ const CarbonWallet = () => {
         .eq("user_id", user.id)
         .single();
       setCredits(data);
+
+      const { data: verified } = await supabase
+        .from("scan_history")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("source" as any, "verified_dropoff")
+        .order("created_at", { ascending: false });
+      setVerifiedCount(verified?.length || 0);
+      setVerifiedRecent((verified || []).slice(0, 5));
+
       setLoading(false);
     };
     fetch();
