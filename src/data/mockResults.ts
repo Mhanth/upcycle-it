@@ -92,6 +92,6 @@ export const mockResults: any[] = [
   },
 ];
 
-export const getRandomResult = (): ScanResult => {
+export const getRandomResult = (): any => {
   return mockResults[Math.floor(Math.random() * mockResults.length)];
 };
