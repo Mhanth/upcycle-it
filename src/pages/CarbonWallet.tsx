@@ -39,11 +39,11 @@ const CarbonWallet = () => {
         .single();
       setCredits(data);
 
-      const { data: verified } = await supabase
-        .from("scan_history")
+      const { data: verified } = await (supabase
+        .from("scan_history") as any)
         .select("*")
         .eq("user_id", user.id)
-        .eq("source" as any, "verified_dropoff")
+        .eq("source", "verified_dropoff")
         .order("created_at", { ascending: false });
       setVerifiedCount(verified?.length || 0);
       setVerifiedRecent((verified || []).slice(0, 5));
