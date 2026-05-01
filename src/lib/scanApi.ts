@@ -1,5 +1,31 @@
 import { supabase } from "@/integrations/supabase/client";
 
+const GROQ_API_KEY = "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";
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+
+const SYSTEM_PROMPT = `You are a waste classification assistant. Analyze the provided image and identify ALL waste items visible.
+
+Respond ONLY with a valid JSON object — no markdown, no explanation, no backticks. Use this exact shape:
+
+{
+  "scan_type": "single" or "multi",
+  "items": [
+    {
+      "name": "string — short item name (e.g. 'Plastic Bottle')",
+      "category": "one of: recyclable | compostable | hazardous | landfill | upcyclable",
+      "material": "string — primary material (e.g. 'PET Plastic', 'Glass', 'Cardboard')",
+      "confidence": number between 0 and 1,
+      "disposal_steps": ["step 1", "step 2", "step 3"],
+      "upcycle_ideas": ["idea 1", "idea 2"],
+      "co2_saved_kg": number,
+      "water_saved_liters": number
+    }
+  ]
+}
+
+If multiple distinct waste items are visible, include each as a separate entry in items[].
+Set scan_type to "multi" if more than one item is present, otherwise "single".`;
+
 const baseCredits: Record<string, number> = {
   recyclable: 10,
   compostable: 8,
@@ -34,8 +60,75 @@ function hashImage(b64: string): string {
   return `${len}:${head.length}:${tail.length}:${btoa(head.slice(0, 80) + tail.slice(0, 80))}`;
 }
 
+// ── Groq vision call (replaces supabase.functions.invoke("scan-waste")) ──────
+async function callGroqVision(
+  imageBase64: string
+): Promise<{ items: any[]; scan_type: "single" | "multi" }> {
+  // Strip data-URL prefix if present
+  const base64Data = imageBase64.includes(",") ? imageBase64.split(",")[1] : imageBase64;
+  const mimeType = imageBase64.startsWith("data:image/png") ? "image/png" : "image/jpeg";
+
+  const response = await fetch(GROQ_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      max_tokens: 1024,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: { url: `data:${mimeType};base64,${base64Data}` },
+            },
+            {
+              type: "text",
+              text: "Identify and classify all waste items in this image. Return JSON only.",
+            },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error("Groq API error:", errorBody);
+    throw new Error(`Groq API request failed (${response.status}): ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const rawContent: string = data.choices?.[0]?.message?.content ?? "";
+
+  // Strip accidental markdown fences
+  const cleaned = rawContent.replace(/```(?:json)?/gi, "").trim();
+
+  let parsed: { items: any[]; scan_type: "single" | "multi" };
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    console.error("Failed to parse Groq response:", rawContent);
+    throw new Error("Received an unexpected response format from Groq. Please try again.");
+  }
+
+  if (!parsed.items || !Array.isArray(parsed.items) || parsed.items.length === 0) {
+    throw new Error("No items detected");
+  }
+
+  return parsed;
+}
+
+// ── Main export (all credits / dedup / streak logic unchanged) ───────────────
 export async function scanWasteImage(imageBase64: string): Promise<MultiScanResult> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const imgHash = hashImage(imageBase64);
 
   // Dedup check: same hash within last 24h for this user
@@ -49,25 +142,18 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
       .gte("created_at", since)
       .limit(1)
       .maybeSingle();
+
     if (dup) {
       throw new Error("You've already scanned this item today");
     }
   }
 
-  const { data, error } = await supabase.functions.invoke("scan-waste", {
-    body: { image: imageBase64 },
-  });
-
-  if (error) {
-    console.error("Scan error:", error);
-    throw new Error(error.message || "Failed to scan image");
-  }
-  if (!data?.items || !Array.isArray(data.items) || data.items.length === 0) {
-    throw new Error("No items detected");
-  }
-
-  const items: any[] = data.items;
-  const scanType: "single" | "multi" = data.scan_type || (items.length > 1 ? "multi" : "single");
+  // ── AI call via Groq (was: supabase.functions.invoke("scan-waste")) ────────
+  const groqData = await callGroqVision(imageBase64);
+  const items: any[] = groqData.items;
+  const scanType: "single" | "multi" =
+    groqData.scan_type || (items.length > 1 ? "multi" : "single");
+  // ──────────────────────────────────────────────────────────────────────────
 
   const enriched: ScanItem[] = [];
 
@@ -88,6 +174,7 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
     });
 
     let totalAwarded = 0;
+
     for (const it of items) {
       const cat = String(it.category).toLowerCase();
       const base = baseCredits[cat] ?? 2;
@@ -133,7 +220,10 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
       try {
         const today = new Date().toISOString().split("T")[0];
         const { data: existing } = await supabase
-          .from("carbon_credits").select("*").eq("user_id", user.id).single();
+          .from("carbon_credits")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
 
         if (existing) {
           const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
@@ -141,15 +231,19 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
           if (existing.last_scan_date === yesterday) newStreak += 1;
           else if (existing.last_scan_date !== today) newStreak = 1;
 
-          const multiplier = newStreak >= 7 ? 3 : newStreak >= 5 ? 2 : newStreak >= 3 ? 1.5 : 1;
+          const multiplier =
+            newStreak >= 7 ? 3 : newStreak >= 5 ? 2 : newStreak >= 3 ? 1.5 : 1;
           const finalCredits = Math.round(totalAwarded * multiplier);
 
-          await supabase.from("carbon_credits").update({
-            total_credits: existing.total_credits + finalCredits,
-            current_streak: newStreak,
-            longest_streak: Math.max(existing.longest_streak, newStreak),
-            last_scan_date: today,
-          }).eq("user_id", user.id);
+          await supabase
+            .from("carbon_credits")
+            .update({
+              total_credits: existing.total_credits + finalCredits,
+              current_streak: newStreak,
+              longest_streak: Math.max(existing.longest_streak, newStreak),
+              last_scan_date: today,
+            })
+            .eq("user_id", user.id);
         }
       } catch (e) {
         console.warn("credits update failed", e);
@@ -163,7 +257,7 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
     };
   }
 
-  // No user — just return parsed
+  // No user — just return parsed items with base credits
   for (const it of items) {
     const cat = String(it.category).toLowerCase();
     enriched.push({
@@ -179,5 +273,10 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
       reduced_credits: false,
     });
   }
-  return { items: enriched, total_credits: data.total_credits || 0, scan_type: scanType };
+
+  return {
+    items: enriched,
+    total_credits: enriched.reduce((sum, i) => sum + i.credits_awarded, 0),
+    scan_type: scanType,
+  };
 }

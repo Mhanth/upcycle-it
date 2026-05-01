@@ -6,27 +6,21 @@ import { toast } from "sonner";
 import ScanLine from "@/components/Scanner/ScanLine";
 import ScanBrackets from "@/components/Scanner/ScanBrackets";
 import CaptureButton from "@/components/Scanner/CaptureButton";
-import ResultSheet, { type ScanResult } from "@/components/Results/ResultSheet";
-import { scanWasteImage } from "@/lib/scanApi";
+import ResultSheet from "@/components/Results/ResultSheet";
+import { scanWasteImage, type MultiScanResult } from "@/lib/scanApi";
 
 const Scanner = () => {
   const webcamRef = useRef<Webcam>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [result, setResult] = useState<ScanResult | null>(null);
+  const [result, setResult] = useState<MultiScanResult | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState(false);
 
-  const handleCapture = useCallback(async () => {
-    if (isProcessing) return;
-    const imageSrc = webcamRef.current?.getScreenshot();
-    if (imageSrc) {
-      setCapturedImage(imageSrc);
-    }
+  const processImage = async (imageSrc: string) => {
     setIsProcessing(true);
-
     try {
-      const scanResult = await scanWasteImage(imageSrc || "");
+      const scanResult = await scanWasteImage(imageSrc);
       setResult(scanResult);
     } catch (e) {
       console.error("Scan failed:", e);
@@ -34,25 +28,34 @@ const Scanner = () => {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleCapture = useCallback(async () => {
+    if (isProcessing) return;
+    const imageSrc = webcamRef.current?.getScreenshot();
+    if (!imageSrc) {
+      toast.error("Could not capture image. Please try again.");
+      return;
+    }
+    setCapturedImage(imageSrc);
+    await processImage(imageSrc);
   }, [isProcessing]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Reset input so the same file can be re-uploaded if needed
+    e.target.value = "";
+
     const reader = new FileReader();
     reader.onload = async () => {
       const imageData = reader.result as string;
       setCapturedImage(imageData);
-      setIsProcessing(true);
-      try {
-        const scanResult = await scanWasteImage(imageData);
-        setResult(scanResult);
-      } catch (err) {
-        console.error("Scan failed:", err);
-        toast.error(err instanceof Error ? err.message : "Failed to analyze image.");
-      } finally {
-        setIsProcessing(false);
-      }
+      await processImage(imageData);
+    };
+    reader.onerror = () => {
+      toast.error("Failed to read the image file. Please try another.");
     };
     reader.readAsDataURL(file);
   };
@@ -93,7 +96,7 @@ const Scanner = () => {
         )}
       </div>
 
-      {/* Overlays */}
+      {/* Scan overlays — hidden while processing or result shown */}
       {!result && !cameraError && (
         <>
           <ScanLine fast={isProcessing} />
@@ -168,7 +171,11 @@ const Scanner = () => {
       />
 
       {/* Result Sheet */}
-      <ResultSheet result={result} onClose={() => setResult(null)} onScanAgain={handleScanAgain} />
+      <ResultSheet
+        result={result}
+        onClose={() => setResult(null)}
+        onScanAgain={handleScanAgain}
+      />
     </div>
   );
 };
