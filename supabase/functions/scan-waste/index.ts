@@ -6,6 +6,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const baseCredits: Record<string, number> = {
+  recyclable: 10,
+  compostable: 8,
+  hazardous: 15,
+  landfill: 2,
+  upcyclable: 12,
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -32,48 +40,29 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are an expert waste identification and environmental science AI. Analyze images of waste items and return structured JSON data. You MUST respond with ONLY valid JSON, no markdown, no code blocks, no explanation text.
+            content: `You are an expert waste identification AI. Identify ALL distinct waste items visible in this image. Return ONLY valid JSON, no markdown. Max 5 items. If only one item, still return an array with one element.
 
-Return this exact JSON structure:
+JSON shape:
 {
-  "name": "specific item name",
-  "confidence": 85,
-  "category": "Recyclable",
-  "material": "material type",
-  "wasteScore": 75,
-  "disposalSteps": ["step 1", "step 2", "step 3"],
-  "upcycleIdeas": [
-    {"title": "idea name", "difficulty": "Easy", "time": "15 min"},
-    {"title": "idea name", "difficulty": "Medium", "time": "30 min"},
-    {"title": "idea name", "difficulty": "Hard", "time": "1 hour"}
-  ],
-  "impact": {
-    "co2": "95g",
-    "water": "1.2L",
-    "readable": "Human readable impact statement"
-  }
-}
-
-Rules:
-- "category" must be one of: "Recyclable", "Compostable", "Hazardous", "Landfill", "Upcyclable"
-- "confidence" is 0-100 integer
-- "wasteScore" is 0-100 (higher = more eco-friendly disposal available)
-- Provide 3-5 disposal steps
-- Provide exactly 3 upcycle ideas with varying difficulty
-- Impact data should be realistic estimates
-- If the image doesn't contain a clear waste item, still identify what you see and categorize it appropriately`
+  "items": [
+    {
+      "name": "string",
+      "category": "recyclable" | "compostable" | "hazardous" | "landfill" | "upcyclable",
+      "material": "string",
+      "confidence": 0-100,
+      "disposal_steps": ["max 3 steps"],
+      "upcycle_ideas": ["max 2 ideas"],
+      "co2_saved_kg": number,
+      "water_saved_liters": number
+    }
+  ]
+}`
           },
           {
             role: "user",
             content: [
-              {
-                type: "text",
-                text: "Identify this waste item. Return ONLY the JSON object, nothing else."
-              },
-              {
-                type: "image_url",
-                image_url: { url: image }
-              }
+              { type: "text", text: "Identify ALL distinct waste items. Return ONLY the JSON object." },
+              { type: "image_url", image_url: { url: image } }
             ]
           }
         ],
@@ -98,18 +87,33 @@ Rules:
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
-
     if (!content) throw new Error("No content in AI response");
 
-    // Parse the JSON from the response, stripping any markdown code blocks
     let cleanContent = content.trim();
     if (cleanContent.startsWith("```")) {
       cleanContent = cleanContent.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     }
 
-    const result = JSON.parse(cleanContent);
+    const parsed = JSON.parse(cleanContent);
+    let items = Array.isArray(parsed.items) ? parsed.items : (Array.isArray(parsed) ? parsed : [parsed]);
+    items = items.slice(0, 5).map((it: any) => ({
+      name: it.name || "Unknown item",
+      category: (it.category || "landfill").toLowerCase(),
+      material: it.material || "Unknown",
+      confidence: Math.round(Number(it.confidence) || 70),
+      disposal_steps: Array.isArray(it.disposal_steps) ? it.disposal_steps.slice(0, 3) : ["Dispose of properly"],
+      upcycle_ideas: Array.isArray(it.upcycle_ideas) ? it.upcycle_ideas.slice(0, 2) : [],
+      co2_saved_kg: Number(it.co2_saved_kg) || 0,
+      water_saved_liters: Number(it.water_saved_liters) || 0,
+    }));
 
-    return new Response(JSON.stringify(result), {
+    const total_credits = items.reduce((sum: number, it: any) => sum + (baseCredits[it.category] ?? 2), 0);
+
+    return new Response(JSON.stringify({
+      items,
+      total_credits,
+      scan_type: items.length > 1 ? "multi" : "single",
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
