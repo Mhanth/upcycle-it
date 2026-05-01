@@ -152,28 +152,10 @@ const Friends = () => {
     if (!addCode.trim() || !user) return;
     setAdding(true);
     try {
-      // Find user by friend_code
-      const { data: target } = await supabase
-        .from("profiles")
-        .select("user_id")
-        .eq("friend_code", addCode.trim())
-        .single();
+      const normalizedCode = addCode.trim().toUpperCase();
 
-      if (!target) { toast.error("No user found with that code"); return; }
-      if (target.user_id === user.id) { toast.error("That's your own code!"); return; }
-
-      // Check existing friendship
-      const { data: existing } = await supabase
-        .from("friendships")
-        .select("id")
-        .or(`and(requester_id.eq.${user.id},receiver_id.eq.${target.user_id}),and(requester_id.eq.${target.user_id},receiver_id.eq.${user.id})`)
-        .limit(1);
-
-      if (existing && existing.length > 0) { toast.error("Already friends or request pending"); return; }
-
-      const { error } = await supabase.from("friendships").insert({
-        requester_id: user.id,
-        receiver_id: target.user_id,
+      const { error } = await supabase.rpc("create_friend_request_by_code", {
+        _friend_code: normalizedCode,
       });
 
       if (error) throw error;
@@ -262,8 +244,9 @@ const Friends = () => {
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={addCode}
-                onChange={(e) => setAddCode(e.target.value)}
+                onChange={(e) => setAddCode(e.target.value.toUpperCase())}
                 placeholder="Enter friend code..."
+                maxLength={12}
                 className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>

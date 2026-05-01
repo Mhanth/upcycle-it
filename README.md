@@ -384,7 +384,3 @@ All environment variables are auto-managed by Lovable Cloud:
 - **Mobile-first:** Bottom nav on mobile, top nav on desktop
 
 ---
-
-## License
-
-This project is built with [Lovable](https://lovable.dev).

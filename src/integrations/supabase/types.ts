@@ -5,10 +5,7 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[]
-
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
@@ -366,6 +363,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_friend_request_by_code: {
+        Args: { _friend_code: string }
+        Returns: string
+      }
       create_org: { Args: { _name: string }; Returns: string }
       is_org_admin: {
         Args: { _org_id: string; _user_id: string }
