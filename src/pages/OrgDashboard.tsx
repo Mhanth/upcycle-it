@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Building2, Copy, School } from "lucide-react";
+import { Building2, Copy, School, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import OrgStats from "@/components/OrgDashboard/OrgStats";
 import Leaderboard, { type MemberStat } from "@/components/OrgDashboard/Leaderboard";
 import StudentManagement from "@/components/OrgDashboard/StudentManagement";
 import ExportReport from "@/components/OrgDashboard/ExportReport";
+import { isCityKnown } from "@/data/municipalRules";
 
 interface OrgData {
   id: string;
@@ -28,11 +29,26 @@ const OrgDashboard = () => {
   const [createMode, setCreateMode] = useState(false);
   const [orgName, setOrgName] = useState("");
   const [joinCode, setJoinCode] = useState("");
+  const [city, setCity] = useState<string>("");
 
   useEffect(() => {
     if (!user) return;
     fetchOrg();
   }, [user]);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`, { headers: { "Accept-Language": "en" } });
+          const j = await r.json();
+          setCity(j?.address?.city || j?.address?.town || j?.address?.village || "");
+        } catch { /* silent */ }
+      },
+      () => {}
+    );
+  }, []);
 
   const fetchOrg = async () => {
     const { data: membership } = await supabase
