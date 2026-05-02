@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       carbon_credits: {
         Row: {
+          co2_pending_g: number
+          co2_saved_g: number
           created_at: string
           current_streak: number
           id: string
@@ -26,6 +28,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          co2_pending_g?: number
+          co2_saved_g?: number
           created_at?: string
           current_streak?: number
           id?: string
@@ -36,6 +40,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          co2_pending_g?: number
+          co2_saved_g?: number
           created_at?: string
           current_streak?: number
           id?: string
