@@ -2,7 +2,7 @@
 
 > AI-powered waste identification and disposal guide that turns garbage into value.
 
-**Live Preview:** [W2W App](https://id-preview--c15dcf09-6740-40ba-b4f4-1541d4830ea5.lovable.app)
+
 
 ---
 
