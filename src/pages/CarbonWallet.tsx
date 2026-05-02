@@ -288,7 +288,7 @@ const CarbonWallet = () => {
                 </span>
               </div>
               {verifiedRecent.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Log a drop-off at a facility to earn 2x CC.</p>
+                <p className="text-xs text-muted-foreground">Log a drop-off at a facility to earn ×2 CO₂ credit.</p>
               ) : (
                 <div className="space-y-2">
                   {verifiedRecent.map((v: any) => (
@@ -299,7 +299,9 @@ const CarbonWallet = () => {
                         </span>
                         <span className="text-foreground truncate">{v.item_name}</span>
                       </div>
-                      <span className="font-data text-primary font-bold flex-shrink-0">+{v.credits_earned}</span>
+                      <span className="font-data text-primary font-bold flex-shrink-0 tabular-nums">
+                        +{Math.round((Number(v.carbon_saved) || 0) * 1000)}g CO₂
+                      </span>
                     </div>
                   ))}
                 </div>
