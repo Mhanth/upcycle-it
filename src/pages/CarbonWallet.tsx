@@ -250,25 +250,32 @@ const CarbonWallet = () => {
               </motion.div>
             )}
 
-            {/* Credit rates */}
+            {/* CO₂ savings table (Indian baseline) */}
             <div className="mt-6 p-4 rounded-xl glass-card">
-              <p className="text-xs font-data text-muted-foreground uppercase tracking-wider mb-3">Credit Rates</p>
+              <p className="text-xs font-data text-muted-foreground uppercase tracking-wider mb-1">CO₂ Saved per Item</p>
+              <p className="text-[10px] text-muted-foreground mb-3">Verified drop-offs earn ×2. 1,000 g = 1 CC.</p>
               <div className="space-y-2">
                 {[
-                  { cat: "Recyclable", cc: 10, color: "bg-category-recycle" },
-                  { cat: "Compostable", cc: 8, color: "bg-category-compost" },
-                  { cat: "Upcyclable", cc: 12, color: "bg-category-upcycle" },
-                  { cat: "Hazardous", cc: 15, color: "bg-category-hazard" },
-                  { cat: "Landfill", cc: 2, color: "bg-category-landfill" },
-                ].map((r) => (
-                  <div key={r.cat} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2.5 h-2.5 rounded-full ${r.color}`} />
-                      <span className="text-xs text-foreground">{r.cat}</span>
+                  { key: "recyclable",  color: "bg-category-recycle" },
+                  { key: "compostable", color: "bg-category-compost" },
+                  { key: "upcyclable",  color: "bg-category-upcycle" },
+                  { key: "hazardous",   color: "bg-category-hazard" },
+                  { key: "landfill",    color: "bg-category-landfill" },
+                ].map((r) => {
+                  const p = CO2_PROFILE[r.key as keyof typeof CO2_PROFILE];
+                  return (
+                    <div key={r.key} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-2.5 h-2.5 rounded-full ${r.color} flex-shrink-0`} />
+                        <span className="text-xs text-foreground">{p.label}</span>
+                        <span className="text-[10px] text-muted-foreground truncate">· {p.example}</span>
+                      </div>
+                      <span className="text-xs font-data text-primary font-bold tabular-nums flex-shrink-0">
+                        +{p.gPerItem} g
+                      </span>
                     </div>
-                    <span className="text-xs font-data text-primary font-bold">+{r.cc} CC</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
