@@ -172,12 +172,26 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
               </div>
 
               {/* Total summary */}
-              <div className="mb-4 p-3 rounded-xl bg-primary/10 border border-primary/20 text-center">
-                <p className="text-xs font-data text-muted-foreground uppercase tracking-wider">Total earned</p>
-                <p className="text-2xl font-display font-bold text-primary">
-                  {result.total_credits} CC <span className="text-sm text-muted-foreground font-normal">across {result.items.length} item{result.items.length > 1 ? "s" : ""}</span>
-                </p>
-              </div>
+              {(() => {
+                const totalG = Math.round(result.items.reduce((s, it) => s + (it.co2_saved_kg || 0) * 1000, 0));
+                return (
+                  <div className="mb-4 p-3 rounded-xl bg-primary/10 border border-primary/20 text-center">
+                    <p className="text-xs font-data text-muted-foreground uppercase tracking-wider">CO₂ added to reservoir</p>
+                    <p className="text-2xl font-display font-bold text-primary tabular-nums">
+                      +{totalG} g <span className="text-sm text-muted-foreground font-normal">across {result.items.length} item{result.items.length > 1 ? "s" : ""}</span>
+                    </p>
+                    {result.total_credits > 0 ? (
+                      <p className="text-[11px] font-data text-category-compost mt-1">
+                        🎉 +{result.total_credits} CC minted to your wallet!
+                      </p>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        Reservoir mints 1 CC per 1,000 g · check your Wallet
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* YouTube Videos for first item */}
               {firstItem && (
