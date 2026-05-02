@@ -80,11 +80,11 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
             <p className="text-[10px] font-data text-muted-foreground mt-1">Material: {item.material}</p>
           </div>
           <div className="text-right">
-            <p className={`text-sm font-display font-bold ${item.reduced_credits ? "text-muted-foreground line-through" : "text-primary"}`}>
-              +{item.credits_awarded} CC
+            <p className={`text-sm font-display font-bold tabular-nums ${item.reduced_credits ? "text-muted-foreground" : "text-primary"}`}>
+              +{Math.round((item.co2_saved_kg || 0) * 1000)}g CO₂
             </p>
             {item.reduced_credits && (
-              <p className="text-[9px] font-data text-destructive">rate-limited</p>
+              <p className="text-[9px] font-data text-destructive">rate-limited (30%)</p>
             )}
           </div>
         </div>
