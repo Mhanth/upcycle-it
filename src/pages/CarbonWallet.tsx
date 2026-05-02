@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Zap, Flame, Trophy, TrendingUp, Award, Crown, Shield, Star, CheckCircle2 } from "lucide-react";
+import { Zap, Flame, Trophy, TrendingUp, Award, Crown, Shield, Star, CheckCircle2, Leaf, Droplets } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CO2_PROFILE, G_PER_CC, verifiedTonneCC, co2Equivalents } from "@/lib/co2Formula";
 
 const badges = [
   { name: "Eco Starter", threshold: 100, icon: Star, color: "text-category-compost" },
@@ -77,14 +78,15 @@ const CarbonWallet = () => {
           <>
             {/* Main credit card */}
             <motion.div
-              className="relative p-6 rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground overflow-hidden mb-6"
+              className="relative p-6 rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground overflow-hidden mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-primary-foreground/10 -translate-y-8 translate-x-8" />
               <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-primary-foreground/5 translate-y-6 -translate-x-6" />
-              <p className="text-xs font-data uppercase tracking-wider opacity-80">Total Carbon Credits</p>
-              <p className="text-5xl font-display font-bold mt-1">{totalCredits}</p>
+              <p className="text-xs font-data uppercase tracking-wider opacity-80">Personal Carbon Credits</p>
+              <p className="text-5xl font-display font-bold mt-1 tabular-nums">{totalCredits}</p>
+              <p className="text-[10px] font-data opacity-70 mt-1">1 CC = 1 kg CO₂ saved (Indian baseline)</p>
               <div className="flex items-center gap-4 mt-4">
                 <div className="flex items-center gap-1.5">
                   <Flame size={14} />
@@ -92,10 +94,65 @@ const CarbonWallet = () => {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Zap size={14} />
-                  <span className="text-xs font-data">{streakMultiplier}x multiplier</span>
+                  <span className="text-xs font-data">{streakMultiplier}x mint bonus</span>
                 </div>
               </div>
             </motion.div>
+
+            {/* CO₂ Reservoir — pending grams toward next CC */}
+            {(() => {
+              const pendingG = Number(credits?.co2_pending_g) || 0;
+              const lifetimeG = Number(credits?.co2_saved_g) || 0;
+              const pct = Math.min(100, (pendingG / G_PER_CC) * 100);
+              const eq = co2Equivalents(lifetimeG);
+              const tonneCC = verifiedTonneCC(lifetimeG);
+              return (
+                <motion.div
+                  className="p-4 rounded-2xl glass-card mb-4"
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-data text-muted-foreground uppercase tracking-wider">CO₂ Reservoir</p>
+                    <span className="text-[10px] font-data text-primary">
+                      {Math.round(pendingG)} / {G_PER_CC} g → next CC
+                    </span>
+                  </div>
+                  <div className="h-3 rounded-full bg-muted overflow-hidden mb-3">
+                    <motion.div
+                      className="h-full rounded-full bg-gradient-to-r from-primary/70 to-primary"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 0.8 }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <p className="text-base font-display font-bold text-foreground tabular-nums">
+                        {(lifetimeG / 1000).toFixed(2)}
+                      </p>
+                      <p className="text-[9px] font-data text-muted-foreground">kg CO₂ lifetime</p>
+                    </div>
+                    <div>
+                      <p className="text-base font-display font-bold text-foreground tabular-nums">
+                        {tonneCC.toFixed(4)}
+                      </p>
+                      <p className="text-[9px] font-data text-muted-foreground">verified tonne CC</p>
+                    </div>
+                    <div>
+                      <p className="text-base font-display font-bold text-foreground tabular-nums">
+                        {Math.round(eq.bottlesEquivalent)}
+                      </p>
+                      <p className="text-[9px] font-data text-muted-foreground">bottles equiv.</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between text-[10px] font-data text-muted-foreground">
+                    <span className="flex items-center gap-1"><Leaf size={11} className="text-category-compost" />{eq.treeDays.toFixed(0)} tree-days</span>
+                    <span>≈ {eq.carKm.toFixed(2)} km of car emissions avoided</span>
+                  </div>
+                </motion.div>
+              );
+            })()}
 
             {/* Streak & multiplier */}
             <div className="grid grid-cols-2 gap-3 mb-6">
@@ -193,25 +250,32 @@ const CarbonWallet = () => {
               </motion.div>
             )}
 
-            {/* Credit rates */}
+            {/* CO₂ savings table (Indian baseline) */}
             <div className="mt-6 p-4 rounded-xl glass-card">
-              <p className="text-xs font-data text-muted-foreground uppercase tracking-wider mb-3">Credit Rates</p>
+              <p className="text-xs font-data text-muted-foreground uppercase tracking-wider mb-1">CO₂ Saved per Item</p>
+              <p className="text-[10px] text-muted-foreground mb-3">Verified drop-offs earn ×2. 1,000 g = 1 CC.</p>
               <div className="space-y-2">
                 {[
-                  { cat: "Recyclable", cc: 10, color: "bg-category-recycle" },
-                  { cat: "Compostable", cc: 8, color: "bg-category-compost" },
-                  { cat: "Upcyclable", cc: 12, color: "bg-category-upcycle" },
-                  { cat: "Hazardous", cc: 15, color: "bg-category-hazard" },
-                  { cat: "Landfill", cc: 2, color: "bg-category-landfill" },
-                ].map((r) => (
-                  <div key={r.cat} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2.5 h-2.5 rounded-full ${r.color}`} />
-                      <span className="text-xs text-foreground">{r.cat}</span>
+                  { key: "recyclable",  color: "bg-category-recycle" },
+                  { key: "compostable", color: "bg-category-compost" },
+                  { key: "upcyclable",  color: "bg-category-upcycle" },
+                  { key: "hazardous",   color: "bg-category-hazard" },
+                  { key: "landfill",    color: "bg-category-landfill" },
+                ].map((r) => {
+                  const p = CO2_PROFILE[r.key as keyof typeof CO2_PROFILE];
+                  return (
+                    <div key={r.key} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-2.5 h-2.5 rounded-full ${r.color} flex-shrink-0`} />
+                        <span className="text-xs text-foreground">{p.label}</span>
+                        <span className="text-[10px] text-muted-foreground truncate">· {p.example}</span>
+                      </div>
+                      <span className="text-xs font-data text-primary font-bold tabular-nums flex-shrink-0">
+                        +{p.gPerItem} g
+                      </span>
                     </div>
-                    <span className="text-xs font-data text-primary font-bold">+{r.cc} CC</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -224,7 +288,7 @@ const CarbonWallet = () => {
                 </span>
               </div>
               {verifiedRecent.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Log a drop-off at a facility to earn 2x CC.</p>
+                <p className="text-xs text-muted-foreground">Log a drop-off at a facility to earn ×2 CO₂ credit.</p>
               ) : (
                 <div className="space-y-2">
                   {verifiedRecent.map((v: any) => (
@@ -235,7 +299,9 @@ const CarbonWallet = () => {
                         </span>
                         <span className="text-foreground truncate">{v.item_name}</span>
                       </div>
-                      <span className="font-data text-primary font-bold flex-shrink-0">+{v.credits_earned}</span>
+                      <span className="font-data text-primary font-bold flex-shrink-0 tabular-nums">
+                        +{Math.round((Number(v.carbon_saved) || 0) * 1000)}g CO₂
+                      </span>
                     </div>
                   ))}
                 </div>

@@ -80,11 +80,11 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
             <p className="text-[10px] font-data text-muted-foreground mt-1">Material: {item.material}</p>
           </div>
           <div className="text-right">
-            <p className={`text-sm font-display font-bold ${item.reduced_credits ? "text-muted-foreground line-through" : "text-primary"}`}>
-              +{item.credits_awarded} CC
+            <p className={`text-sm font-display font-bold tabular-nums ${item.reduced_credits ? "text-muted-foreground" : "text-primary"}`}>
+              +{Math.round((item.co2_saved_kg || 0) * 1000)}g CO₂
             </p>
             {item.reduced_credits && (
-              <p className="text-[9px] font-data text-destructive">rate-limited</p>
+              <p className="text-[9px] font-data text-destructive">rate-limited (30%)</p>
             )}
           </div>
         </div>
@@ -172,12 +172,26 @@ const ResultSheet = ({ result, onClose, onScanAgain }: ResultSheetProps) => {
               </div>
 
               {/* Total summary */}
-              <div className="mb-4 p-3 rounded-xl bg-primary/10 border border-primary/20 text-center">
-                <p className="text-xs font-data text-muted-foreground uppercase tracking-wider">Total earned</p>
-                <p className="text-2xl font-display font-bold text-primary">
-                  {result.total_credits} CC <span className="text-sm text-muted-foreground font-normal">across {result.items.length} item{result.items.length > 1 ? "s" : ""}</span>
-                </p>
-              </div>
+              {(() => {
+                const totalG = Math.round(result.items.reduce((s, it) => s + (it.co2_saved_kg || 0) * 1000, 0));
+                return (
+                  <div className="mb-4 p-3 rounded-xl bg-primary/10 border border-primary/20 text-center">
+                    <p className="text-xs font-data text-muted-foreground uppercase tracking-wider">CO₂ added to reservoir</p>
+                    <p className="text-2xl font-display font-bold text-primary tabular-nums">
+                      +{totalG} g <span className="text-sm text-muted-foreground font-normal">across {result.items.length} item{result.items.length > 1 ? "s" : ""}</span>
+                    </p>
+                    {result.total_credits > 0 ? (
+                      <p className="text-[11px] font-data text-category-compost mt-1">
+                        🎉 +{result.total_credits} CC minted to your wallet!
+                      </p>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        Reservoir mints 1 CC per 1,000 g · check your Wallet
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* YouTube Videos for first item */}
               {firstItem && (

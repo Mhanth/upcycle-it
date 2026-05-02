@@ -26,13 +26,7 @@ Respond ONLY with a valid JSON object — no markdown, no explanation, no backti
 If multiple distinct waste items are visible, include each as a separate entry in items[].
 Set scan_type to "multi" if more than one item is present, otherwise "single".`;
 
-const baseCredits: Record<string, number> = {
-  recyclable: 10,
-  compostable: 8,
-  hazardous: 15,
-  landfill: 2,
-  upcyclable: 12,
-};
+import { co2GramsForItem, mintFromReservoir, type Category } from "./co2Formula";
 
 export interface ScanItem {
   name: string;
@@ -148,17 +142,16 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
     }
   }
 
-  // ── AI call via Groq (was: supabase.functions.invoke("scan-waste")) ────────
+  // ── AI call via Groq ─────────────────────────────────────────────────────
   const groqData = await callGroqVision(imageBase64);
   const items: any[] = groqData.items;
   const scanType: "single" | "multi" =
     groqData.scan_type || (items.length > 1 ? "multi" : "single");
-  // ──────────────────────────────────────────────────────────────────────────
 
   const enriched: ScanItem[] = [];
 
   if (user) {
-    // Time gate: count CC-earning scans per category in last 60min
+    // Anti-farming: cap CC-earning items per category to 3/hour (extras still log CO₂ at 30%)
     const sixtyMinAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { data: recent } = await supabase
       .from("scan_history")
@@ -168,21 +161,22 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
 
     const catCounts: Record<string, number> = {};
     (recent || []).forEach((r: any) => {
-      if ((r.credits_earned ?? 0) > 0) {
-        catCounts[r.category] = (catCounts[r.category] || 0) + 1;
-      }
+      catCounts[r.category] = (catCounts[r.category] || 0) + 1;
     });
 
-    let totalAwarded = 0;
+    let totalCo2G = 0;
 
     for (const it of items) {
-      const cat = String(it.category).toLowerCase();
-      const base = baseCredits[cat] ?? 2;
+      const cat = String(it.category).toLowerCase() as Category;
       const count = catCounts[cat] || 0;
       const reduced = count >= 3;
-      const credits = reduced ? 0 : base;
+
+      // Compute CO₂ grams (Indian baseline). Reduced scans count at 30%.
+      let co2G = co2GramsForItem(cat, false, Number(it.co2_saved_kg) || 0);
+      if (reduced) co2G = Math.round(co2G * 0.3);
+
       catCounts[cat] = count + 1;
-      totalAwarded += credits;
+      totalCo2G += co2G;
 
       try {
         await supabase.from("scan_history").insert({
@@ -191,8 +185,8 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
           category: cat as any,
           disposal_method: (it.disposal_steps || []).join(" → "),
           material: it.material,
-          carbon_saved: Number(it.co2_saved_kg) || 0,
-          credits_earned: credits,
+          carbon_saved: co2G / 1000, // store kg in legacy column for back-compat
+          credits_earned: 0,         // CC no longer per-scan
           image_hash: imgHash,
           reduced_credits: reduced,
           source: "scan",
@@ -203,20 +197,21 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
 
       enriched.push({
         name: it.name,
-        category: cat as any,
+        category: cat,
         material: it.material,
         confidence: it.confidence,
         disposal_steps: it.disposal_steps || [],
         upcycle_ideas: it.upcycle_ideas || [],
-        co2_saved_kg: Number(it.co2_saved_kg) || 0,
+        co2_saved_kg: co2G / 1000,
         water_saved_liters: Number(it.water_saved_liters) || 0,
-        credits_awarded: credits,
+        credits_awarded: 0,
         reduced_credits: reduced,
       });
     }
 
-    // Update carbon_credits once with totalAwarded
-    if (totalAwarded > 0) {
+    // ── Reservoir update + CC mint ─────────────────────────────────────────
+    let mintedCC = 0;
+    if (totalCo2G > 0) {
       try {
         const today = new Date().toISOString().split("T")[0];
         const { data: existing } = await supabase
@@ -231,52 +226,61 @@ export async function scanWasteImage(imageBase64: string): Promise<MultiScanResu
           if (existing.last_scan_date === yesterday) newStreak += 1;
           else if (existing.last_scan_date !== today) newStreak = 1;
 
-          const multiplier =
-            newStreak >= 7 ? 3 : newStreak >= 5 ? 2 : newStreak >= 3 ? 1.5 : 1;
-          const finalCredits = Math.round(totalAwarded * multiplier);
+          const prevPending = Number((existing as any).co2_pending_g) || 0;
+          const lifetime = Number((existing as any).co2_saved_g) || 0;
+
+          const { mintedCC: minted, newPendingG } = mintFromReservoir(
+            prevPending,
+            totalCo2G,
+            newStreak,
+          );
+          mintedCC = minted;
 
           await supabase
             .from("carbon_credits")
             .update({
-              total_credits: existing.total_credits + finalCredits,
+              total_credits: existing.total_credits + minted,
+              co2_saved_g: lifetime + totalCo2G,
+              co2_pending_g: newPendingG,
               current_streak: newStreak,
               longest_streak: Math.max(existing.longest_streak, newStreak),
               last_scan_date: today,
-            })
+            } as any)
             .eq("user_id", user.id);
         }
       } catch (e) {
-        console.warn("credits update failed", e);
+        console.warn("reservoir update failed", e);
       }
     }
 
     return {
       items: enriched,
-      total_credits: totalAwarded,
+      total_credits: mintedCC, // CC actually minted to wallet this scan (often 0)
       scan_type: scanType,
     };
   }
 
-  // No user — just return parsed items with base credits
+  // No user — preview-only result
   for (const it of items) {
-    const cat = String(it.category).toLowerCase();
+    const cat = String(it.category).toLowerCase() as Category;
+    const co2G = co2GramsForItem(cat, false, Number(it.co2_saved_kg) || 0);
     enriched.push({
       name: it.name,
-      category: cat as any,
+      category: cat,
       material: it.material,
       confidence: it.confidence,
       disposal_steps: it.disposal_steps || [],
       upcycle_ideas: it.upcycle_ideas || [],
-      co2_saved_kg: Number(it.co2_saved_kg) || 0,
+      co2_saved_kg: co2G / 1000,
       water_saved_liters: Number(it.water_saved_liters) || 0,
-      credits_awarded: baseCredits[cat] ?? 2,
+      credits_awarded: 0,
       reduced_credits: false,
     });
   }
 
   return {
     items: enriched,
-    total_credits: enriched.reduce((sum, i) => sum + i.credits_awarded, 0),
+    total_credits: 0,
     scan_type: scanType,
   };
 }
