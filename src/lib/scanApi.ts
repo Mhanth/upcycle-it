@@ -26,13 +26,7 @@ Respond ONLY with a valid JSON object — no markdown, no explanation, no backti
 If multiple distinct waste items are visible, include each as a separate entry in items[].
 Set scan_type to "multi" if more than one item is present, otherwise "single".`;
 
-const baseCredits: Record<string, number> = {
-  recyclable: 10,
-  compostable: 8,
-  hazardous: 15,
-  landfill: 2,
-  upcyclable: 12,
-};
+import { co2GramsForItem, mintFromReservoir, type Category } from "./co2Formula";
 
 export interface ScanItem {
   name: string;
