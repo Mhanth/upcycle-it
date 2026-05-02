@@ -265,28 +265,43 @@ const Facilities = () => {
   const confirmDropoff = async (categoryKey: string) => {
     if (!user || !dropoffFacility) return;
     const cat = CATEGORIES.find((c) => c.key === categoryKey)!;
-    const credits = cat.base * 2;
+    // Use new CO2-grams formula with verified ×2 multiplier
+    const { co2GramsForItem, mintFromReservoir } = await import("@/lib/co2Formula");
+    const co2G = co2GramsForItem(categoryKey as any, true);
+
     try {
       await supabase.from("scan_history").insert({
         user_id: user.id,
         item_name: `Verified drop-off: ${dropoffFacility.name}`,
         category: categoryKey as any,
         material: cat.label,
-        carbon_saved: 0,
-        credits_earned: credits,
+        carbon_saved: co2G / 1000,
+        credits_earned: 0,
         disposal_method: `Dropped at ${dropoffFacility.name}`,
         source: "verified_dropoff",
       } as any);
 
-      // Update wallet
       const { data: wallet } = await supabase
         .from("carbon_credits").select("*").eq("user_id", user.id).single();
+      let mintedCC = 0;
       if (wallet) {
+        const prevPending = Number((wallet as any).co2_pending_g) || 0;
+        const lifetime = Number((wallet as any).co2_saved_g) || 0;
+        const { mintedCC: minted, newPendingG } = mintFromReservoir(
+          prevPending, co2G, wallet.current_streak,
+        );
+        mintedCC = minted;
         await supabase.from("carbon_credits").update({
-          total_credits: wallet.total_credits + credits,
-        }).eq("user_id", user.id);
+          total_credits: wallet.total_credits + minted,
+          co2_saved_g: lifetime + co2G,
+          co2_pending_g: newPendingG,
+        } as any).eq("user_id", user.id);
       }
-      toast.success(`+${credits} CC awarded for verified drop-off!`);
+      toast.success(
+        mintedCC > 0
+          ? `+${co2G}g CO₂ saved · +${mintedCC} CC minted!`
+          : `+${co2G}g CO₂ saved (verified ×2). Reservoir filling…`
+      );
       setDropoffOpen(false);
       setDropoffFacility(null);
     } catch (e) {
