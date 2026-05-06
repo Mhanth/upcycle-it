@@ -382,6 +382,30 @@ export type Database = {
     }
     Functions: {
       create_org: { Args: { _name: string }; Returns: string }
+      get_org_leaderboard: {
+        Args: { _org_id: string }
+        Returns: {
+          avatar_url: string
+          co2_saved_g: number
+          current_streak: number
+          display_name: string
+          last_scan_at: string
+          scan_count: number
+          total_credits: number
+          total_xp: number
+          user_id: string
+        }[]
+      }
+      get_org_stats: {
+        Args: { _org_id: string }
+        Returns: {
+          active_today: number
+          member_count: number
+          scans_this_week: number
+          total_co2_saved_g: number
+          total_scans: number
+        }[]
+      }
       is_org_admin: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
