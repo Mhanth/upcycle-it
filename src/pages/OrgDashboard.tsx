@@ -51,6 +51,7 @@ const OrgDashboard = () => {
   }, []);
 
   const fetchOrg = async () => {
+    setLoading(true);
     const { data: membership } = await supabase
       .from("organization_members")
       .select("organization_id, role")
@@ -59,70 +60,43 @@ const OrgDashboard = () => {
       .maybeSingle();
 
     if (!membership) {
+      setOrg(null);
       setLoading(false);
       return;
     }
 
-    const { data: orgData } = await supabase
-      .from("organizations")
-      .select("*")
-      .eq("id", membership.organization_id)
-      .single();
+    const orgId = membership.organization_id;
+
+    const [{ data: orgData }, { data: lb }, { data: stats }] = await Promise.all([
+      supabase.from("organizations").select("*").eq("id", orgId).single(),
+      supabase.rpc("get_org_leaderboard", { _org_id: orgId }) as any,
+      supabase.rpc("get_org_stats", { _org_id: orgId }) as any,
+    ]);
 
     if (!orgData) {
+      setOrg(null);
       setLoading(false);
       return;
     }
 
-    const { data: members } = await supabase
-      .from("organization_members")
-      .select("user_id")
-      .eq("organization_id", orgData.id);
+    const leaderboard: MemberStat[] = ((lb as any[]) || []).map((row: any) => ({
+      user_id: row.user_id,
+      display_name: row.display_name || "Member",
+      total_scans: Number(row.scan_count) || 0,
+      total_credits: Number(row.total_credits) || 0,
+      total_co2: (Number(row.co2_saved_g) || 0) / 1000,
+    }));
 
-    const memberIds = members?.map((m) => m.user_id) || [];
-
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("user_id, display_name")
-      .in("user_id", memberIds);
-
-    const { data: scans } = await supabase
-      .from("scan_history")
-      .select("user_id, credits_earned, carbon_saved")
-      .in("user_id", memberIds);
-
-    const statsMap: Record<string, MemberStat> = {};
-    memberIds.forEach((uid) => {
-      const p = profiles?.find((pr) => pr.user_id === uid);
-      statsMap[uid] = {
-        user_id: uid,
-        display_name: p?.display_name || "Member",
-        total_scans: 0,
-        total_credits: 0,
-        total_co2: 0,
-      };
-    });
-
-    scans?.forEach((s) => {
-      if (statsMap[s.user_id]) {
-        statsMap[s.user_id].total_scans += 1;
-        statsMap[s.user_id].total_co2 += Number(s.carbon_saved) || 0;
-        statsMap[s.user_id].total_credits += s.credits_earned || 0;
-      }
-    });
-
-    const leaderboard = Object.values(statsMap).sort((a, b) => b.total_scans - a.total_scans);
-    const totalScans = leaderboard.reduce((s, m) => s + m.total_scans, 0);
-    const totalCo2 = leaderboard.reduce((s, m) => s + m.total_co2, 0);
+    const s = (stats as any[])?.[0];
 
     setOrg({
       id: orgData.id,
       name: orgData.name,
       invite_code: orgData.invite_code,
       role: membership.role,
-      member_count: memberIds.length,
-      total_scans: totalScans,
-      total_co2: Math.round(totalCo2 * 100) / 100,
+      member_count: Number(s?.member_count) || leaderboard.length,
+      total_scans: Number(s?.total_scans) || 0,
+      total_co2: Math.round(((Number(s?.total_co2_saved_g) || 0) / 1000) * 100) / 100,
       leaderboard,
     });
     setLoading(false);
