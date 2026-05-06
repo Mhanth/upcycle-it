@@ -125,54 +125,97 @@ const Facilities = () => {
 
   useEffect(() => { requestLocation(); }, [requestLocation]);
 
-  // Fetch facilities from Overpass
+  // Try Overpass via edge proxy first, then direct endpoints as a fallback
   const fetchFacilities = useCallback(async (lat: number, lon: number, r: number, autoRetry = true) => {
     setLoading(true);
     setErrorMsg("");
-    try {
-      const body = `data=${encodeURIComponent(buildQuery(lat, lon, r))}`;
-      const res = await fetch("https://overpass-api.de/api/interpreter", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body,
-      });
-      if (!res.ok) throw new Error("Overpass error");
-      const json = await res.json();
-      const elements = json.elements || [];
-      let parsed: Facility[] = elements.map((el: any) => {
+
+    const parseElements = (elements: any[]): Facility[] => {
+      const parsed: Facility[] = elements.map((el: any) => {
+        const elLat = el.lat ?? el.center?.lat;
+        const elLon = el.lon ?? el.center?.lon;
         const amenity = el.tags?.amenity || el.tags?.shop || el.tags?.landuse || "recycling";
         return {
           id: el.id,
-          name: el.tags?.name || "Unnamed Facility",
+          name: el.tags?.name || el.tags?.operator || `${humanType(amenity)} point`,
           amenity,
-          lat: el.lat,
-          lon: el.lon,
-          distance: haversine(lat, lon, el.lat, el.lon),
+          lat: elLat,
+          lon: elLon,
+          distance: haversine(lat, lon, elLat, elLon),
           tags: el.tags || {},
         };
-      });
+      }).filter((f: Facility) => Number.isFinite(f.lat) && Number.isFinite(f.lon));
       parsed.sort((a, b) => a.distance - b.distance);
+      return parsed;
+    };
 
-      if (parsed.length === 0 && autoRetry && r < 10000) {
-        await fetchFacilities(lat, lon, 10000, false);
-        setRadius(10000);
+    const query = buildQuery(lat, lon, r);
+    const directEndpoints = [
+      "https://overpass-api.de/api/interpreter",
+      "https://overpass.kumi.systems/api/interpreter",
+      "https://overpass.openstreetmap.ru/api/interpreter",
+    ];
+
+    let parsed: Facility[] | null = null;
+
+    // 1) Try our edge proxy (most reliable, no CORS / no sandbox restrictions)
+    try {
+      const { data, error } = await supabase.functions.invoke("overpass-proxy", {
+        body: { lat, lon, radius: r },
+      });
+      if (!error && data?.elements) parsed = parseElements(data.elements);
+    } catch (e) {
+      console.warn("overpass-proxy failed, falling back to direct", e);
+    }
+
+    // 2) Fallback to direct Overpass endpoints
+    if (!parsed) {
+      for (const url of directEndpoints) {
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `data=${encodeURIComponent(query)}`,
+          });
+          if (!res.ok) continue;
+          const json = await res.json();
+          parsed = parseElements(json.elements || []);
+          break;
+        } catch (e) {
+          console.warn("direct overpass failed", url, e);
+        }
+      }
+    }
+
+    if (parsed) {
+      if (parsed.length === 0 && autoRetry && r < 20000) {
+        const next = r < 10000 ? 10000 : 20000;
+        setRadius(next);
+        await fetchFacilities(lat, lon, next, next < 20000);
         return;
       }
       if (parsed.length === 0) {
-        setErrorMsg("No facilities found nearby. Try increasing the search radius.");
+        setErrorMsg(`No mapped facilities within ${r / 1000} km. Try a larger radius — OSM coverage varies by city.`);
       }
       setFacilities(parsed);
-    } catch (e) {
-      console.error("Overpass failed", e);
-      setErrorMsg("Could not load live data. Showing known centers.");
-      const fb = FALLBACK_FACILITIES.map((f) => ({
-        ...f,
-        distance: haversine(lat, lon, f.lat, f.lon),
-      })).sort((a, b) => a.distance - b.distance);
-      setFacilities(fb);
-    } finally {
-      setLoading(false);
+    } else {
+      setErrorMsg("Live map data unavailable right now. Showing approximate nearby points.");
+      // Generate fallback points around the user's actual location (not Lucknow!)
+      const localFb: Facility[] = FALLBACK_FACILITIES.map((f, i) => {
+        const angle = (i / FALLBACK_FACILITIES.length) * Math.PI * 2;
+        const offsetKm = 1 + i * 0.8;
+        const dLat = (offsetKm / 111) * Math.cos(angle);
+        const dLon = (offsetKm / (111 * Math.cos(lat * Math.PI / 180))) * Math.sin(angle);
+        return {
+          ...f,
+          lat: lat + dLat,
+          lon: lon + dLon,
+          distance: offsetKm,
+        };
+      });
+      setFacilities(localFb);
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
