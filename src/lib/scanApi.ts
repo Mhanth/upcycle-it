@@ -1,31 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const GROQ_API_KEY = "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";
-const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-
-const SYSTEM_PROMPT = `You are a waste classification assistant. Analyze the provided image and identify ALL waste items visible.
-
-Respond ONLY with a valid JSON object — no markdown, no explanation, no backticks. Use this exact shape:
-
-{
-  "scan_type": "single" or "multi",
-  "items": [
-    {
-      "name": "string — short item name (e.g. 'Plastic Bottle')",
-      "category": "one of: recyclable | compostable | hazardous | landfill | upcyclable",
-      "material": "string — primary material (e.g. 'PET Plastic', 'Glass', 'Cardboard')",
-      "confidence": number between 0 and 1,
-      "disposal_steps": ["step 1", "step 2", "step 3"],
-      "upcycle_ideas": ["idea 1", "idea 2"],
-      "co2_saved_kg": number,
-      "water_saved_liters": number
-    }
-  ]
-}
-
-If multiple distinct waste items are visible, include each as a separate entry in items[].
-Set scan_type to "multi" if more than one item is present, otherwise "single".`;
-
 import { co2GramsForItem, mintFromReservoir, type Category } from "./co2Formula";
 
 export interface ScanItem {
