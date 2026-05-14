@@ -1,31 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const GROQ_API_KEY = "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";
-const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-
-const SYSTEM_PROMPT = `You are a waste classification assistant. Analyze the provided image and identify ALL waste items visible.
-
-Respond ONLY with a valid JSON object — no markdown, no explanation, no backticks. Use this exact shape:
-
-{
-  "scan_type": "single" or "multi",
-  "items": [
-    {
-      "name": "string — short item name (e.g. 'Plastic Bottle')",
-      "category": "one of: recyclable | compostable | hazardous | landfill | upcyclable",
-      "material": "string — primary material (e.g. 'PET Plastic', 'Glass', 'Cardboard')",
-      "confidence": number between 0 and 1,
-      "disposal_steps": ["step 1", "step 2", "step 3"],
-      "upcycle_ideas": ["idea 1", "idea 2"],
-      "co2_saved_kg": number,
-      "water_saved_liters": number
-    }
-  ]
-}
-
-If multiple distinct waste items are visible, include each as a separate entry in items[].
-Set scan_type to "multi" if more than one item is present, otherwise "single".`;
-
 import { co2GramsForItem, mintFromReservoir, type Category } from "./co2Formula";
 
 export interface ScanItem {
@@ -54,67 +28,29 @@ function hashImage(b64: string): string {
   return `${len}:${head.length}:${tail.length}:${btoa(head.slice(0, 80) + tail.slice(0, 80))}`;
 }
 
-// ── Groq vision call (replaces supabase.functions.invoke("scan-waste")) ──────
+// ── Vision scan via Supabase edge function (uses server GROQ_API_KEY) ────────
 async function callGroqVision(
   imageBase64: string
 ): Promise<{ items: any[]; scan_type: "single" | "multi" }> {
-  // Strip data-URL prefix if present
-  const base64Data = imageBase64.includes(",") ? imageBase64.split(",")[1] : imageBase64;
-  const mimeType = imageBase64.startsWith("data:image/png") ? "image/png" : "image/jpeg";
-
-  const response = await fetch(GROQ_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${GROQ_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
-      max_tokens: 1024,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: [
-            {
-              type: "image_url",
-              image_url: { url: `data:${mimeType};base64,${base64Data}` },
-            },
-            {
-              type: "text",
-              text: "Identify and classify all waste items in this image. Return JSON only.",
-            },
-          ],
-        },
-      ],
-    }),
+  const { data, error } = await supabase.functions.invoke("scan-waste", {
+    body: { image: imageBase64 },
   });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    console.error("Groq API error:", errorBody);
-    throw new Error(`Groq API request failed (${response.status}): ${response.statusText}`);
+  if (error) {
+    console.error("scan-waste invoke error:", error);
+    throw new Error(error.message || "Scan failed. Please try again.");
+  }
+  if ((data as any)?.error) {
+    throw new Error((data as any).error);
   }
 
-  const data = await response.json();
-  const rawContent: string = data.choices?.[0]?.message?.content ?? "";
+  const items = Array.isArray((data as any)?.items) ? (data as any).items : [];
+  if (items.length === 0) throw new Error("No items detected");
 
-  // Strip accidental markdown fences
-  const cleaned = rawContent.replace(/```(?:json)?/gi, "").trim();
+  const scan_type: "single" | "multi" =
+    (data as any)?.scan_type || (items.length > 1 ? "multi" : "single");
 
-  let parsed: { items: any[]; scan_type: "single" | "multi" };
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch {
-    console.error("Failed to parse Groq response:", rawContent);
-    throw new Error("Received an unexpected response format from Groq. Please try again.");
-  }
-
-  if (!parsed.items || !Array.isArray(parsed.items) || parsed.items.length === 0) {
-    throw new Error("No items detected");
-  }
-
-  return parsed;
+  return { items, scan_type };
 }
 
 // ── Main export (all credits / dedup / streak logic unchanged) ───────────────
