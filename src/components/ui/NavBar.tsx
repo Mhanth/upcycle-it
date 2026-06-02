@@ -4,6 +4,7 @@ import { Camera, Map, Users, BarChart3, Home, Wallet, Building2, LogIn, Shopping
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { hasFeature, type Feature } from "@/lib/variant";
 
 const NavBar = () => {
   const location = useLocation();
@@ -14,22 +15,24 @@ const NavBar = () => {
   const isStudent = profile?.account_type === "student";
   const isOrg = profile?.account_type === "company" || profile?.account_type === "school";
 
-  const navItems = [
+  const allItems: Array<{ path: string; icon: any; label: string; feature?: Feature }> = [
     { path: "/", icon: Home, label: "Home" },
-    { path: "/scan", icon: Camera, label: "Scan" },
-    { path: "/marketplace", icon: ShoppingBag, label: "Marketplace" },
-    
-    { path: "/facilities", icon: Map, label: "Facilities" },
+    { path: "/scan", icon: Camera, label: "Scan", feature: "scanner" },
+    { path: "/marketplace", icon: ShoppingBag, label: "Marketplace", feature: "marketplace" },
+    { path: "/facilities", icon: Map, label: "Facilities", feature: "facilities" },
     ...(user
       ? [
           ...(isOrg
-            ? [{ path: "/org", icon: GraduationCap, label: "Students" }]
-            : [{ path: "/friends", icon: UserPlus, label: "Friends" }]),
-          { path: "/log", icon: BarChart3, label: "My Log" },
-          ...(isStudent ? [{ path: "/wallet", icon: Wallet, label: "Wallet" }] : []),
+            ? [{ path: "/org", icon: GraduationCap, label: "Students", feature: "org-dashboard" as Feature }]
+            : [{ path: "/friends", icon: UserPlus, label: "Friends", feature: "friends" as Feature }]),
+          { path: "/log", icon: BarChart3, label: "My Log", feature: "mylog" as Feature },
+          ...(isStudent ? [{ path: "/wallet", icon: Wallet, label: "Wallet", feature: "wallet" as Feature }] : []),
         ]
       : [{ path: "/auth", icon: LogIn, label: "Login" }]),
   ];
+
+  // Hide items whose required feature isn't allowed in this variant
+  const navItems = allItems.filter((i) => !i.feature || hasFeature(i.feature));
 
   // Desktop top nav
   if (!isMobile) {
