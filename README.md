@@ -384,3 +384,14 @@ All environment variables are auto-managed by Lovable Cloud:
 - **Mobile-first:** Bottom nav on mobile, top nav on desktop
 
 ---
+
+Team Name: TrashToTreasure
+Track: Sustainability / Waste Management
+Project Name: Waste2Worth (W2W)
+Team Members:
+Sarvesh Tripathi — Team Lead, Full-Stack Developer & AI Integrator
+Contact: 6387674345
+Adityaraj Dwivedi — Team Member, Database Management and AI integration review 
+Contact: +91 73181 24388
+Ravi Kumar — Team Member, Research and Development, Frontend designs 
+Contact: +91 91205 70016
