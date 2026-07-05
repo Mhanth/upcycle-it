@@ -382,6 +382,7 @@ export type Database = {
     }
     Functions: {
       create_org: { Args: { _name: string }; Returns: string }
+      get_org_invite_code: { Args: { _org_id: string }; Returns: string }
       get_org_leaderboard: {
         Args: { _org_id: string }
         Returns: {
